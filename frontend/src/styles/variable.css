@@ -1,0 +1,383 @@
+/* src/styles/variables.css */
+
+/* ===== CSS VARIABLES - NEWPREM THEME ===== */
+:root {
+  /* ===== GOLD COLORS - PRIMARY THEME ===== */
+  --gold-50: #faf6ed;
+  --gold-100: #f5ecd9;
+  --gold-200: #e8d5b0;
+  --gold-300: #dbc187;
+  --gold-400: #ceaa5e;
+  --gold-500: #c9a96e;  /* Primary Gold */
+  --gold-600: #b08e5e;
+  --gold-700: #a07840;
+  --gold-800: #8b6220;
+  --gold-900: #6b4a18;
+  --gold-950: #4a3510;
+  
+  /* Deep Gold - For Logo */
+  --deep-gold: #b8860b;
+  
+  /* ===== WOOD COLORS - FOR PLYWOOD SECTION ===== */
+  --wood-50: #faf3ed;
+  --wood-100: #f5e6db;
+  --wood-200: #e8ccb5;
+  --wood-300: #dbb28e;
+  --wood-400: #ce9768;
+  --wood-500: #bd7b4d;  /* Primary Wood */
+  --wood-600: #a5673f;
+  --wood-700: #8b5a2b;
+  --wood-800: #6e451f;
+  --wood-900: #523517;
+  --wood-950: #36230f;
+  
+  /* ===== GLASS COLORS - FOR GLASS SECTION ===== */
+  --glass-50: #eaf3f3;
+  --glass-100: #d5e7e7;
+  --glass-200: #aacfcf;
+  --glass-300: #80b7b7;
+  --glass-400: #559f9f;
+  --glass-500: #4f8a8b;  /* Primary Glass */
+  --glass-600: #3f6f70;
+  --glass-700: #2c5a5b;
+  --glass-800: #1e4041;
+  --glass-900: #122b2c;
+  --glass-950: #0a1819;
+  
+  /* ===== INTERIOR COLORS - FOR INTERIORS SECTION ===== */
+  --interior-50: #fcecec;
+  --interior-100: #f9d9d9;
+  --interior-200: #f3b3b3;
+  --interior-300: #ed8d8d;
+  --interior-400: #e76767;
+  --interior-500: #c45a5a;  /* Primary Interior */
+  --interior-600: #a54b4b;
+  --interior-700: #8b3a3a;
+  --interior-800: #672b2b;
+  --interior-900: #471e1e;
+  --interior-950: #2a1212;
+  
+  /* ===== HARDWARE COLORS - FOR HARDWARE SECTION ===== */
+  --hardware-50: #f9f3e9;
+  --hardware-100: #f3e7d3;
+  --hardware-200: #e7cfa7;
+  --hardware-300: #dbb77b;
+  --hardware-400: #cf9f4f;
+  --hardware-500: #b1935c;  /* Primary Hardware */
+  --hardware-600: #95794b;
+  --hardware-700: #7a6b3f;
+  --hardware-800: #5c4f2e;
+  --hardware-900: #423920;
+  --hardware-950: #2a2414;
+  
+  /* ===== NEUTRAL COLORS ===== */
+  --black: #0a0a0a;
+  --dark-950: #111111;
+  --dark-900: #1a1a1a;
+  --dark-800: #222222;
+  --dark-700: #2a2a2a;
+  --dark-600: #333333;
+  --gray-500: #666666;
+  --gray-400: #888888;
+  --gray-300: #aaaaaa;
+  --gray-200: #cccccc;
+  --gray-100: #e0e0e0;
+  --gray-50: #f5f5f5;
+  
+  /* Warm Whites */
+  --warm-white: #f8f5f0;
+  --off-white: #ede8df;
+  --cream: #f2ede4;
+  --ivory: #fffff0;
+  
+  /* Pure Whites */
+  --white: #ffffff;
+  
+  /* ===== BACKGROUND COLORS ===== */
+  --bg-primary: var(--warm-white);
+  --bg-secondary: var(--off-white);
+  --bg-dark: var(--dark-950);
+  --bg-gold-light: rgba(201, 169, 110, 0.1);
+  --bg-gold-medium: rgba(201, 169, 110, 0.2);
+  --bg-gold-dark: rgba(201, 169, 110, 0.3);
+  --bg-glass-light: rgba(79, 138, 139, 0.1);
+  --bg-wood-light: rgba(189, 123, 77, 0.1);
+  --bg-interior-light: rgba(196, 90, 90, 0.1);
+  --bg-hardware-light: rgba(177, 147, 92, 0.1);
+  
+  /* ===== TEXT COLORS ===== */
+  --text-primary: var(--dark-950);
+  --text-secondary: var(--gray-400);
+  --text-muted: var(--gray-500);
+  --text-light: var(--white);
+  --text-gold: var(--gold-500);
+  --text-wood: var(--wood-500);
+  --text-glass: var(--glass-500);
+  --text-interior: var(--interior-500);
+  --text-hardware: var(--hardware-500);
+  
+  /* ===== BORDER COLORS ===== */
+  --border-light: var(--gray-100);
+  --border-medium: var(--gray-200);
+  --border-dark: var(--gray-300);
+  --border-gold: rgba(201, 169, 110, 0.3);
+  --border-gold-dark: rgba(201, 169, 110, 0.5);
+  --border-gold-light: rgba(201, 169, 110, 0.1);
+  
+  /* ===== GRADIENTS ===== */
+  --gradient-gold: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-700) 100%);
+  --gradient-gold-reverse: linear-gradient(135deg, var(--gold-700) 0%, var(--gold-500) 100%);
+  --gradient-gold-light: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-500) 100%);
+  --gradient-wood: linear-gradient(135deg, var(--wood-500) 0%, var(--wood-700) 100%);
+  --gradient-glass: linear-gradient(135deg, var(--glass-500) 0%, var(--glass-700) 100%);
+  --gradient-interior: linear-gradient(135deg, var(--interior-500) 0%, var(--interior-700) 100%);
+  --gradient-hardware: linear-gradient(135deg, var(--hardware-500) 0%, var(--hardware-700) 100%);
+  --gradient-dark: linear-gradient(135deg, var(--dark-950) 0%, var(--dark-900) 100%);
+  --gradient-dark-reverse: linear-gradient(135deg, var(--dark-900) 0%, var(--dark-950) 100%);
+  --gradient-warm: linear-gradient(135deg, var(--warm-white) 0%, var(--off-white) 100%);
+  
+  /* ===== TYPOGRAPHY ===== */
+  --font-primary: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-secondary: 'Cormorant Garamond', Georgia, 'Times New Roman', Times, serif;
+  --font-display: 'DM Serif Display', Georgia, 'Times New Roman', Times, serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  
+  /* Font Weights */
+  --font-thin: 100;
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  
+  /* Line Heights */
+  --line-none: 1;
+  --line-tight: 1.25;
+  --line-normal: 1.5;
+  --line-relaxed: 1.75;
+  --line-loose: 2;
+  
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  
+  /* ===== SPACING ===== */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0_5: 0.125rem;  /* 2px */
+  --space-1: 0.25rem;     /* 4px */
+  --space-1_5: 0.375rem;  /* 6px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-2_5: 0.625rem;  /* 10px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-3_5: 0.875rem;  /* 14px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-7: 1.75rem;     /* 28px */
+  --space-8: 2rem;        /* 32px */
+  --space-9: 2.25rem;     /* 36px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-11: 2.75rem;    /* 44px */
+  --space-12: 3rem;       /* 48px */
+  --space-14: 3.5rem;     /* 56px */
+  --space-16: 4rem;       /* 64px */
+  --space-20: 5rem;       /* 80px */
+  --space-24: 6rem;       /* 96px */
+  --space-28: 7rem;       /* 112px */
+  --space-32: 8rem;       /* 128px */
+  --space-36: 9rem;       /* 144px */
+  --space-40: 10rem;      /* 160px */
+  --space-44: 11rem;      /* 176px */
+  --space-48: 12rem;      /* 192px */
+  --space-52: 13rem;      /* 208px */
+  --space-56: 14rem;      /* 224px */
+  --space-60: 15rem;      /* 240px */
+  --space-64: 16rem;      /* 256px */
+  
+  /* ===== BREAKPOINTS ===== */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1536px;
+  --breakpoint-4xl: 1920px;
+  
+  /* ===== CONTAINER SIZES ===== */
+  --container-xs: var(--breakpoint-xs);
+  --container-sm: var(--breakpoint-sm);
+  --container-md: var(--breakpoint-md);
+  --container-lg: var(--breakpoint-lg);
+  --container-xl: var(--breakpoint-xl);
+  --container-2xl: 1400px;
+  --container-full: 100%;
+  
+  /* ===== Z-INDEX ===== */
+  --z-negative: -1;
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-auto: auto;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-toast: 700;
+  --z-loader: 800;
+  --z-navbar: 1000;
+  
+  /* ===== TRANSITIONS ===== */
+  --transition-none: none;
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-gold: 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  
+  /* ===== SHADOWS ===== */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-gold-sm: 0 4px 10px rgba(201, 169, 110, 0.1);
+  --shadow-gold-md: 0 8px 20px rgba(201, 169, 110, 0.15);
+  --shadow-gold-lg: 0 15px 30px rgba(201, 169, 110, 0.2);
+  --shadow-gold-xl: 0 25px 40px rgba(201, 169, 110, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-outline: 0 0 0 3px rgba(201, 169, 110, 0.3);
+  
+  /* ===== BORDER RADIUS ===== */
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  --radius-full: 9999px;
+  --radius-circle: 50%;
+  
+  /* ===== BLUR EFFECTS ===== */
+  --blur-none: 0;
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 12px;
+  --blur-xl: 16px;
+  --blur-2xl: 24px;
+  --blur-3xl: 32px;
+  
+  /* ===== OPACITY ===== */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+}
+
+/* ===== DARK MODE VARIABLES ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: var(--dark-950);
+    --bg-secondary: var(--dark-900);
+    --text-primary: var(--white);
+    --text-secondary: var(--gray-300);
+    --text-muted: var(--gray-500);
+    --border-light: var(--dark-800);
+    --border-medium: var(--dark-700);
+    --border-dark: var(--dark-600);
+    
+    --gradient-gold: linear-gradient(135deg, var(--gold-600) 0%, var(--gold-800) 100%);
+    --gradient-wood: linear-gradient(135deg, var(--wood-600) 0%, var(--wood-800) 100%);
+    --gradient-glass: linear-gradient(135deg, var(--glass-600) 0%, var(--glass-800) 100%);
+    --gradient-interior: linear-gradient(135deg, var(--interior-600) 0%, var(--interior-800) 100%);
+    --gradient-hardware: linear-gradient(135deg, var(--hardware-600) 0%, var(--hardware-800) 100%);
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  :root {
+    --gold-500: #b8860b;
+    --wood-500: #8b5a2b;
+    --glass-500: #1e4a4b;
+    --interior-500: #8b3a3a;
+    --hardware-500: #6b4f2b;
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-base: 0ms;
+    --transition-slow: 0ms;
+    --transition-smooth: 0ms;
+    --transition-bounce: 0ms;
+    --transition-gold: 0ms;
+  }
+}
+
+/* ===== PRINT MODE ===== */
+@media print {
+  :root {
+    --bg-primary: white;
+    --text-primary: black;
+    --shadow-none: none;
+    --gradient-gold: none;
+    color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ===== EXPORT TOKENS ===== */
+:export {
+  /* Colors */
+  goldPrimary: var(--gold-500);
+  goldDark: var(--gold-700);
+  goldLight: var(--gold-300);
+  woodPrimary: var(--wood-500);
+  glassPrimary: var(--glass-500);
+  interiorPrimary: var(--interior-500);
+  hardwarePrimary: var(--hardware-500);
+  
+  /* Breakpoints */
+  breakpointSm: var(--breakpoint-sm);
+  breakpointMd: var(--breakpoint-md);
+  breakpointLg: var(--breakpoint-lg);
+  breakpointXl: var(--breakpoint-xl);
+  
+  /* Spacing */
+  space4: var(--space-4);
+  space6: var(--space-6);
+  space8: var(--space-8);
+  
+  /* Fonts */
+  fontPrimary: var(--font-primary);
+  fontSecondary: var(--font-secondary);
+  fontDisplay: var(--font-display);
+}
