@@ -1,0 +1,316 @@
+/* src/index.css - MAIN ENTRY FILE */
+
+/* Import all style files */
+@import './styles/variables.css';
+@import './styles/globals.css';
+@import './styles/animations.css';
+@import './styles/glassmorphism.css';
+
+/* ===== ROOT STYLES ===== */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  overflow-x: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+@media (min-width: var(--breakpoint-md)) {
+  .main-content {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: var(--breakpoint-lg)) {
+  .main-content {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* ===== LOGO STYLES - NEWPREM ===== */
+.newprem-logo {
+  height: auto;
+  width: auto;
+  max-width: 180px;
+  padding: var(--space-2);
+  transition: filter var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.newprem-logo:hover {
+  filter: drop-shadow(0 0 10px rgba(201, 169, 110, 0.5));
+}
+
+.logo-main {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: var(--font-bold);
+  color: var(--gold-500);
+  line-height: 1;
+  letter-spacing: -2px;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-sub {
+  font-family: var(--font-secondary);
+  font-size: 0.9rem;
+  color: var(--deep-gold);
+  font-weight: var(--font-semibold);
+  line-height: 1.3;
+  font-style: italic;
+  max-width: 100px;
+  text-align: left;
+}
+
+/* ===== CARD STYLES - NEWPREM ===== */
+.newprem-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-gold);
+  border: 1px solid var(--border-gold-light);
+  padding: var(--space-6);
+}
+
+.newprem-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-gold-lg);
+  border-color: var(--border-gold);
+}
+
+/* ===== BUTTON STYLES - NEWPREM ===== */
+.newprem-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-gold);
+  text-decoration: none;
+  font-size: var(--text-md);
+  font-family: var(--font-primary);
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.newprem-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--dark-950);
+  transform: translateX(-101%);
+  transition: transform 0.4s var(--transition-gold);
+  z-index: 0;
+}
+
+.newprem-btn:hover::before {
+  transform: translateX(0);
+}
+
+.newprem-btn span,
+.newprem-btn svg {
+  position: relative;
+  z-index: 1;
+}
+
+.newprem-btn-primary {
+  background: var(--gradient-gold);
+  color: var(--dark-950);
+  box-shadow: var(--shadow-gold-sm);
+}
+
+.newprem-btn-primary:hover {
+  color: var(--gold-500);
+  box-shadow: var(--shadow-gold-lg);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+.newprem-logo-animated {
+  animation: logoFloat 6s var(--transition-gold) infinite;
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(201, 169, 110, 0);
+  }
+}
+
+.gold-pulse {
+  animation: goldPulse 2s infinite;
+}
+
+/* ===== READ THE DOCS ===== */
+.read-the-docs {
+  color: var(--gray-400);
+  font-size: var(--text-sm);
+  text-align: center;
+  margin-top: var(--space-8);
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-gold-light);
+}
+
+.read-the-docs a {
+  color: var(--gold-500);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.read-the-docs a:hover {
+  color: var(--gold-700);
+  text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: var(--breakpoint-md)) {
+  .newprem-logo {
+    max-width: 140px;
+  }
+  
+  .logo-main {
+    font-size: 2rem;
+  }
+  
+  .logo-sub {
+    font-size: 0.8rem;
+  }
+  
+  .newprem-card {
+    padding: var(--space-4);
+  }
+  
+  .newprem-btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .newprem-logo {
+    max-width: 120px;
+  }
+  
+  .logo-main {
+    font-size: 1.8rem;
+  }
+  
+  .logo-sub {
+    font-size: 0.7rem;
+    max-width: 80px;
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-gradient-gold {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-gold {
+  background: var(--gradient-gold);
+}
+
+.border-gradient-gold {
+  border-image: var(--gradient-gold) 1;
+}
+
+.shadow-gold {
+  box-shadow: var(--shadow-gold-md);
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-gold-lg);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .newprem-logo {
+    filter: none;
+  }
+  
+  .newprem-btn {
+    display: none;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  .newprem-btn-primary {
+    background: var(--gold-700);
+    color: white;
+  }
+  
+  .text-gradient-gold {
+    background: none;
+    color: var(--gold-700);
+    -webkit-text-fill-color: var(--gold-700);
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  .newprem-logo-animated,
+  .gold-pulse,
+  .newprem-card,
+  .newprem-btn {
+    animation: none;
+    transition: none;
+  }
+  
+  .newprem-card:hover {
+    transform: none;
+  }
+  
+  .newprem-btn:hover {
+    transform: none;
+  }
+}
