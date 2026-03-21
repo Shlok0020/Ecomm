@@ -58,7 +58,7 @@ const Login = () => {
         console.log('👑 Admin login - redirecting to admin panel with token');
         // Pass token and user data via URL parameters
         const userParam = encodeURIComponent(JSON.stringify(userData));
-        window.location.href = `https://newpremglasshouse.in/dashboard?token=${userData.token}&user=${userParam}`;
+        window.location.href = `https://admin.newpremglasshouse.in/dashboard`;
       } else {
         console.log('👤 User login - redirecting to homepage');
         
