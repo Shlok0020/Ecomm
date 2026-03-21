@@ -2,7 +2,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = "http://api.newpremglasshouse.in/api";
+const API_URL = "https://api.newpremglasshouse.in/api";
 
 console.log("🔌 API URL:", API_URL);
 
