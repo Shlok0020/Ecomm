@@ -1,4 +1,4 @@
-// src/App.jsx
+// frontend/src/App.jsx - FIXED VERSION (WITH ROUTER CONFIGURATION)
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react';
@@ -21,6 +21,10 @@ const Cart = lazy(() => import('./pages/Cart'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Order = lazy(() => import('./pages/Order'));
+
+// ✅ USER PAGES
+const Profile = lazy(() => import('./pages/Profile'));
+const MyOrders = lazy(() => import('./pages/MyOrders'));
 
 import './styles/globals.css';
 import './styles/animation.css';
@@ -54,20 +58,38 @@ const LogoutHandler = () => {
   return null; // This component doesn't render anything
 };
 
-// ============= HELPER COMPONENT FOR CONDITIONAL NAVBAR =============
+// ============= HELPER COMPONENT FOR CONDITIONAL NAVBAR & FOOTER =============
 const ConditionalLayout = ({ children }) => {
   const location = useLocation();
   
-  // Define paths where you DON'T want the Navbar/Footer to show
-  const hideLayoutPaths = ['/login', '/register', '/admin'];
+  // ✅ Sirf in pages par footer dikhega
+  const mainPages = [
+    '/',
+    '/about',
+    '/glass',
+    '/hardware',
+    '/plywood',
+    '/interiors',
+    '/contact'
+  ];
   
-  const shouldHide = hideLayoutPaths.includes(location.pathname);
+  // Check if current path is in mainPages
+  const isMainPage = mainPages.includes(location.pathname);
 
-  if (shouldHide) {
-    return <>{children}</>;
-  }
+  return (
+    <MainLayout showFooter={isMainPage}>
+      {children}
+    </MainLayout>
+  );
+};
 
-  return <MainLayout>{children}</MainLayout>;
+// ============= AUTH LAYOUT - No Navbar/Footer for auth pages =============
+const AuthLayout = ({ children }) => {
+  return (
+    <div className="auth-layout">
+      {children}
+    </div>
+  );
 };
 
 // ============= LOADING COMPONENT =============
@@ -216,12 +238,12 @@ function App() {
           <meta name="keywords" content="New Prem Glass House, Jharsuguda glass shop, interior designers Jharsuguda, hardware store Jharsuguda, plywood dealers Jharsuguda, modular kitchen Jharsuguda" />
         </Helmet>
 
-        {/* ✅ Logout handler is now inside Router where toast works */}
+        {/* Logout handler inside Router where toast works */}
         <LogoutHandler />
 
         <Suspense fallback={<PageLoading />}>
           <Routes>
-            {/* Wrap all routes with ConditionalLayout */}
+            {/* ✅ MAIN PAGES - Footer dikhega */}
             <Route path="/" element={<ConditionalLayout><Home /></ConditionalLayout>} />
             <Route path="/about" element={<ConditionalLayout><About /></ConditionalLayout>} />
             <Route path="/contact" element={<ConditionalLayout><Contact /></ConditionalLayout>} />
@@ -229,12 +251,26 @@ function App() {
             <Route path="/hardware" element={<ConditionalLayout><Hardware /></ConditionalLayout>} />
             <Route path="/plywood" element={<ConditionalLayout><Plywood /></ConditionalLayout>} />
             <Route path="/interiors" element={<ConditionalLayout><Interiors /></ConditionalLayout>} />
-            <Route path="/cart" element={<ConditionalLayout><Cart /></ConditionalLayout>} />
-            <Route path="/order" element={<ConditionalLayout><Order /></ConditionalLayout>} />
             
-            {/* Auth Routes - Navbar will hide automatically based on path */}
-            <Route path="/login" element={<ConditionalLayout><Login /></ConditionalLayout>} />
-            <Route path="/register" element={<ConditionalLayout><Register /></ConditionalLayout>} />
+            {/* 🛒 Cart & Order - Footer nahi dikhega */}
+            <Route path="/cart" element={<MainLayout showFooter={false}><Cart /></MainLayout>} />
+            <Route path="/order" element={<MainLayout showFooter={false}><Order /></MainLayout>} />
+            
+            {/* 👤 USER PAGES - Footer nahi dikhega */}
+            <Route path="/profile" element={<MainLayout showFooter={false}><Profile /></MainLayout>} />
+            <Route path="/my-orders" element={<MainLayout showFooter={false}><MyOrders /></MainLayout>} />
+            
+            {/* 🔐 AUTH PAGES - No Layout (clean auth pages) */}
+            <Route path="/login" element={
+              <AuthLayout>
+                <Login />
+              </AuthLayout>
+            } />
+            <Route path="/register" element={
+              <AuthLayout>
+                <Register />
+              </AuthLayout>
+            } />
             
             {/* Redirects */}
             <Route path="/home" element={<Navigate to="/" replace />} />

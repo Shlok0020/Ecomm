@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-mongoose.connect('mongodb://127.0.0.1:27017/glasshouse')
+mongoose.connect('mongodb+srv://NewPrem:KhatuShyam75@cluster0.1k5d6db.mongodb.net/glasshouse?retryWrites=true&w=majority')
   .then(() => console.log('✅ MongoDB Connected'));
 
 const User = require('./models/User');

@@ -2,10 +2,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
-const {
-  sendNewOrderNotification,
-  sendOrderStatusNotification
-} = require('../utils/notificationService');
 
 // Generate unique order ID
 const generateOrderId = () => {
@@ -18,7 +14,18 @@ const createOrder = async (req, res) => {
   try {
     console.log('📦 Creating order with data:', req.body);
     
-    const { items, totalAmount, customerInfo, paymentMethod, address } = req.body;
+    // Handle both 'items' and 'products' from frontend
+    const { items, products, totalAmount, customerInfo, paymentMethod, address } = req.body;
+    
+    // Use either items or products array
+    const orderItems = items || products || [];
+    
+    if (!orderItems || orderItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No items in order'
+      });
+    }
     
     // Get user from token if logged in
     const userId = req.user ? req.user.id : null;
@@ -35,6 +42,7 @@ const createOrder = async (req, res) => {
           email: user.email,
           phone: user.phone
         };
+        console.log('👤 User found:', user.email);
       }
     }
 
@@ -50,7 +58,7 @@ const createOrder = async (req, res) => {
     let calculatedTotal = 0;
     const productDetails = [];
 
-    for (const item of items) {
+    for (const item of orderItems) {
       // Try to find product in database
       let product = null;
       if (item.productId) {
@@ -89,6 +97,22 @@ const createOrder = async (req, res) => {
     // Use provided totalAmount or calculated total
     const finalTotal = totalAmount || calculatedTotal;
 
+    // Normalize payment method to match enum values
+    let normalizedPaymentMethod = 'cash'; // default
+    if (paymentMethod) {
+      const methodStr = paymentMethod.toString().toLowerCase();
+      if (methodStr.includes('cash')) normalizedPaymentMethod = 'cash';
+      else if (methodStr.includes('card')) normalizedPaymentMethod = 'card';
+      else if (methodStr.includes('online') || methodStr.includes('upi') || methodStr.includes('paytm') || methodStr.includes('gpay')) {
+        normalizedPaymentMethod = 'online';
+      }
+      else {
+        normalizedPaymentMethod = 'cash';
+      }
+    }
+
+    console.log('💰 Payment method:', paymentMethod, '→', normalizedPaymentMethod);
+
     // Create order
     const order = await Order.create({
       orderId: generateOrderId(),
@@ -96,11 +120,13 @@ const createOrder = async (req, res) => {
       customerInfo: finalCustomerInfo,
       products: productDetails,
       totalAmount: finalTotal,
-      paymentMethod: paymentMethod || 'cash',
+      paymentMethod: normalizedPaymentMethod,
       status: 'pending'
     });
 
     console.log('✅ Order created:', order.orderId);
+    console.log('👤 User ID:', userId);
+    console.log('📦 Order ID:', order._id);
 
     // If user is logged in, add order to user's orders array
     if (userId && user) {
@@ -109,28 +135,8 @@ const createOrder = async (req, res) => {
         { $push: { orders: order._id } },
         { new: true }
       );
-      console.log(`📋 Order added to user ${userId}'s dashboard`);
+      console.log(`📋 Order added to user ${userId}'s orders array`);
     }
-
-    // 🚀 Send new order notification to admin (don't await)
-    const orderData = {
-      orderId: order.orderId,
-      customerName: finalCustomerInfo.name,
-      customerEmail: finalCustomerInfo.email,
-      customerPhone: finalCustomerInfo.phone,
-      items: productDetails,
-      totalAmount: finalTotal,
-      date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-      status: order.status
-    };
-
-    sendNewOrderNotification(orderData)
-      .then(result => {
-        console.log('📧 New order notifications sent:', result);
-      })
-      .catch(err => {
-        console.error('❌ Failed to send order notifications:', err);
-      });
 
     res.status(201).json({
       success: true,
@@ -155,29 +161,39 @@ const createOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log('🔍 Fetching orders for user:', userId);
     
-    // Find user and populate orders
-    const user = await User.findById(userId)
-      .populate({
-        path: 'orders',
-        options: { sort: { createdAt: -1 } },
-        populate: {
-          path: 'products.productId',
-          select: 'name image price'
-        }
-      });
+    // Method 1: Find orders where user field matches
+    let orders = await Order.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .populate('products.productId', 'name image price');
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    console.log(`📦 Found ${orders.length} orders via user field`);
+
+    // Method 2: If no orders found, try to find by email
+    if (orders.length === 0 && req.user.email) {
+      console.log('🔍 Trying to find orders by email:', req.user.email);
+      const ordersByEmail = await Order.find({ 
+        'customerInfo.email': req.user.email 
+      }).sort({ createdAt: -1 });
+      
+      console.log(`📦 Found ${ordersByEmail.length} orders via email`);
+      
+      // If found by email, update them with user ID
+      if (ordersByEmail.length > 0) {
+        await Order.updateMany(
+          { 'customerInfo.email': req.user.email },
+          { $set: { user: userId } }
+        );
+        console.log('✅ Updated orders with user ID');
+        orders = ordersByEmail;
+      }
     }
 
     res.json({
       success: true,
-      data: user.orders || [],
-      count: user.orders?.length || 0
+      data: orders || [],
+      count: orders?.length || 0
     });
 
   } catch (error) {
@@ -270,6 +286,8 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     
+    console.log(`📝 Updating order ${req.params.id} to status: ${status}`);
+    
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { status },
@@ -283,21 +301,7 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Prepare order data for notification
-    const orderData = {
-      orderId: order.orderId,
-      customerName: order.customerInfo.name || order.user?.name,
-      customerEmail: order.customerInfo.email || order.user?.email,
-      customerPhone: order.customerInfo.phone || order.user?.phone,
-      status: status,
-      items: order.products,
-      totalAmount: order.totalAmount,
-      date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-
-    // 🚀 Send status update notification to customer (don't await)
-    sendOrderStatusNotification(orderData)
-      .catch(err => console.error('❌ Status update notification failed:', err));
+    console.log('✅ Order updated successfully:', order.orderId);
 
     res.json({
       success: true,
@@ -357,22 +361,6 @@ const cancelOrder = async (req, res) => {
       }
     }
 
-    // Prepare order data for cancellation notification
-    const orderData = {
-      orderId: order.orderId,
-      customerName: order.customerInfo.name || order.user?.name,
-      customerEmail: order.customerInfo.email || order.user?.email,
-      customerPhone: order.customerInfo.phone || order.user?.phone,
-      status: 'cancelled',
-      items: order.products,
-      totalAmount: order.totalAmount,
-      date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-
-    // 🚀 Send cancellation notification to customer
-    sendOrderStatusNotification(orderData)
-      .catch(err => console.error('❌ Cancellation notification failed:', err));
-
     res.json({
       success: true,
       data: order,
@@ -389,7 +377,6 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-// Export all functions
 module.exports = {
   createOrder,
   getUserOrders,

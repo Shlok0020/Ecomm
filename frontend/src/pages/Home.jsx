@@ -1,4 +1,4 @@
-// src/pages/Home/Home.jsx - CARDS ANIMATE ONCE ON SCROLL
+// src/pages/Home/Home.jsx - WITH WORKING SKELETON LOADING AND MOBILE TAP SUPPORT
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -34,6 +34,306 @@ import hardwareService from '../services/hardwareService';
 import interiorService from '../services/interiorService';
 import toast from 'react-hot-toast';
 
+// ============= UNIQUE ANIMATION VARIANTS =============
+
+// Hero animations
+const heroVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.2,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const heroItemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+      duration: 0.8
+    }
+  }
+};
+
+const heroTitleVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { 
+      type: "spring",
+      stiffness: 80,
+      damping: 10,
+      duration: 0.9
+    }
+  }
+};
+
+// Card 1 - Flip from left with 3D rotation
+const cardVariant1 = {
+  hidden: { 
+    opacity: 0, 
+    x: -100, 
+    rotateY: -45,
+    scale: 0.8
+  },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    rotateY: 0,
+    scale: 1,
+    transition: { 
+      type: "spring", 
+      stiffness: 70,
+      damping: 12,
+      duration: 0.8
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -10,
+    rotateY: 5,
+    boxShadow: "0 30px 60px rgba(201, 169, 110, 0.3)",
+    transition: { 
+      type: "spring", 
+      stiffness: 300,
+      damping: 15
+    }
+  }
+};
+
+// Card 2 - Pop from bottom with bounce
+const cardVariant2 = {
+  hidden: { 
+    opacity: 0, 
+    y: 150, 
+    scale: 0.3 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { 
+      type: "spring", 
+      stiffness: 120,
+      damping: 10,
+      duration: 0.8
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -10,
+    rotate: 2,
+    boxShadow: "0 30px 60px rgba(201, 169, 110, 0.3)",
+    transition: { 
+      type: "spring", 
+      stiffness: 300,
+      damping: 15
+    }
+  }
+};
+
+// Card 3 - Spin and fade with skew
+const cardVariant3 = {
+  hidden: { 
+    opacity: 0, 
+    rotate: -180, 
+    scale: 0.3,
+    skewX: 15
+  },
+  visible: { 
+    opacity: 1, 
+    rotate: 0, 
+    scale: 1,
+    skewX: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 60,
+      damping: 8,
+      duration: 0.9
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -10,
+    rotate: -3,
+    boxShadow: "0 30px 60px rgba(201, 169, 110, 0.3)",
+    transition: { 
+      type: "spring", 
+      stiffness: 300,
+      damping: 15
+    }
+  }
+};
+
+// Card 4 - Slide from right with elastic
+const cardVariant4 = {
+  hidden: { 
+    opacity: 0, 
+    x: 150, 
+    skewX: -15 
+  },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    skewX: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 80,
+      damping: 11,
+      duration: 0.8
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -10,
+    rotate: 2,
+    boxShadow: "0 30px 60px rgba(201, 169, 110, 0.3)",
+    transition: { 
+      type: "spring", 
+      stiffness: 300,
+      damping: 15
+    }
+  }
+};
+
+// Box animation variants
+const boxVariant1 = {
+  hidden: { opacity: 0, x: -50, rotate: -5 },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    rotate: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 100,
+      damping: 12,
+      delay: 0.1
+    }
+  },
+  hover: {
+    scale: 1.05,
+    rotate: 2,
+    boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+const boxVariant2 = {
+  hidden: { opacity: 0, y: 50, scale: 0.8 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { 
+      type: "spring", 
+      stiffness: 120,
+      damping: 14,
+      delay: 0.2
+    }
+  },
+  hover: {
+    scale: 1.05,
+    rotate: -2,
+    boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+const boxVariant3 = {
+  hidden: { opacity: 0, scale: 0.3, rotate: 180 },
+  visible: { 
+    opacity: 1, 
+    scale: 1, 
+    rotate: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 80,
+      damping: 10,
+      delay: 0.3
+    }
+  },
+  hover: {
+    scale: 1.05,
+    rotate: 3,
+    boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+const boxVariant4 = {
+  hidden: { opacity: 0, x: 50, skewX: 15 },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    skewX: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 90,
+      damping: 13,
+      delay: 0.4
+    }
+  },
+  hover: {
+    scale: 1.05,
+    rotate: -3,
+    boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+// Project card variants
+const projectVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 30 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+      delay: i * 0.1
+    }
+  }),
+  hover: {
+    scale: 1.03,
+    y: -5,
+    boxShadow: "0 30px 60px rgba(201, 169, 110, 0.25)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+// Testimonial variants
+const testimonialVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.95 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+      delay: i * 0.15
+    }
+  }),
+  hover: {
+    y: -8,
+    scale: 1.02,
+    boxShadow: "0 20px 40px rgba(201, 169, 110, 0.2)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
 // ============= SKELETON LOADING COMPONENT =============
 const HomeSkeleton = () => {
   return (
@@ -64,14 +364,22 @@ const HomeSkeleton = () => {
               <div className="skeleton-btn-primary"></div>
               <div className="skeleton-btn-ghost"></div>
             </div>
+
+            {/* Mobile stats skeleton */}
+            <div className="mobile-stats-container" style={{ marginTop: '30px' }}>
+              {[1, 2, 3].map(i => (
+                <div key={i} className="skeleton-mobile-stat"></div>
+              ))}
+            </div>
           </div>
         </div>
 
+        {/* Desktop stats skeleton */}
         <div className="mk-hero__stats">
           {[1, 2, 3].map(i => (
-            <div key={i} className="mk-hero__stat">
-              <div className="skeleton-stat-number"></div>
-              <div className="skeleton-stat-label"></div>
+            <div key={i} style={{ textAlign: 'right', marginBottom: '20px' }}>
+              <div className="skeleton-stat-number" style={{ width: '80px', height: '40px', marginLeft: 'auto' }}></div>
+              <div className="skeleton-stat-label" style={{ width: '100px', height: '20px', marginLeft: 'auto', marginTop: '5px' }}></div>
             </div>
           ))}
         </div>
@@ -83,7 +391,7 @@ const HomeSkeleton = () => {
       </div>
 
       {/* About Section Skeleton */}
-      <motion.section className="mk-section mk-section--white" style={{ padding: 0 }}>
+      <section className="mk-section mk-section--white" style={{ padding: 0 }}>
         <div className="mk-about-card">
           <div className="mk-about-card__image-wrap">
             <div className="skeleton-about-image"></div>
@@ -95,9 +403,9 @@ const HomeSkeleton = () => {
             <div className="skeleton-text" style={{ width: '90%', marginBottom: '2rem' }}></div>
             <div className="mk-about-card__features">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="mk-about-card__feature">
+                <div key={i} className="mk-about-card__feature" style={{ padding: '15px' }}>
                   <div className="skeleton-feature-icon"></div>
-                  <div>
+                  <div style={{ width: '100%' }}>
                     <div className="skeleton-feature-title"></div>
                     <div className="skeleton-feature-desc"></div>
                   </div>
@@ -106,27 +414,27 @@ const HomeSkeleton = () => {
             </div>
             <div className="mk-about-card__stats">
               {[1, 2, 3].map(i => (
-                <div key={i} className="mk-about-card__stat-item">
-                  <div className="skeleton-stat-number"></div>
-                  <div className="skeleton-stat-label"></div>
+                <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+                  <div className="skeleton-stat-number" style={{ margin: '0 auto' }}></div>
+                  <div className="skeleton-stat-label" style={{ margin: '5px auto 0' }}></div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Expertise Section Skeleton */}
       <section className="expertise-section">
         <div className="expertise-bg-pattern"></div>
         <div className="container">
           <div className="expertise-header">
-            <div className="mk-label">
+            <div className="mk-label" style={{ justifyContent: 'center' }}>
               <div className="skeleton-label-line"></div>
               <div className="skeleton-label-text"></div>
               <div className="skeleton-label-line"></div>
             </div>
-            <div className="skeleton-title-large" style={{ width: '400px', margin: '0 auto' }}></div>
+            <div className="skeleton-title-large" style={{ width: '400px', margin: '20px auto' }}></div>
           </div>
 
           <div className="expertise-grid">
@@ -136,7 +444,6 @@ const HomeSkeleton = () => {
                   <div className="skeleton-card-image"></div>
                 </div>
                 <div className="card-content-unique">
-                  <div className="card-number">0{i}</div>
                   <div className="skeleton-card-title"></div>
                   <div className="skeleton-card-desc"></div>
                   <div className="card-features">
@@ -144,9 +451,7 @@ const HomeSkeleton = () => {
                       <div key={j} className="skeleton-feature-pill"></div>
                     ))}
                   </div>
-                  <div className="card-cta-unique">
-                    <div className="skeleton-card-link"></div>
-                  </div>
+                  <div className="skeleton-card-link"></div>
                 </div>
               </div>
             ))}
@@ -156,7 +461,7 @@ const HomeSkeleton = () => {
 
       {/* Projects Section Skeleton */}
       <section className="projects-section-unique">
-        <div className="projects-bg-text">Portfolio</div>
+        <div className="projects-bg-text"></div>
         <div className="container">
           <div className="projects-header-unique">
             <div>
@@ -183,12 +488,12 @@ const HomeSkeleton = () => {
       <section className="mk-section mk-section--dark mk-testimonials">
         <div className="container">
           <div className="skeleton-testimonials-header">
-            <div className="mk-label">
+            <div className="mk-label" style={{ justifyContent: 'center' }}>
               <div className="skeleton-label-line-light"></div>
               <div className="skeleton-label-text-light"></div>
               <div className="skeleton-label-line-light"></div>
             </div>
-            <div className="skeleton-title-light"></div>
+            <div className="skeleton-title-light" style={{ margin: '20px auto' }}></div>
           </div>
 
           <div className="mk-testimonials__grid">
@@ -255,6 +560,17 @@ const HomeSkeleton = () => {
           border-bottom: 2px solid rgba(255,255,255,0.1);
           animation: pulse 1.5s ease-in-out infinite;
           animation-delay: 0.4s;
+        }
+
+        .skeleton-mobile-stat {
+          width: 100%;
+          height: 70px;
+          background: rgba(255,255,255,0.08);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          margin-bottom: 12px;
+          animation: pulse 1.5s ease-in-out infinite;
         }
 
         .skeleton-stat-number {
@@ -349,6 +665,7 @@ const HomeSkeleton = () => {
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
           border-radius: 10px;
+          flex-shrink: 0;
         }
 
         .skeleton-feature-title {
@@ -435,6 +752,8 @@ const HomeSkeleton = () => {
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
           border-radius: 30px;
+          display: inline-block;
+          margin-right: 8px;
         }
 
         .skeleton-card-link {
@@ -555,16 +874,23 @@ const HomeSkeleton = () => {
           .expertise-grid {
             grid-template-columns: 1fr;
           }
+          
+          .skeleton-project-desc {
+            width: 100%;
+            height: 60px;
+          }
         }
       `}</style>
     </div>
   );
 };
 
+// ============= MAIN HOME COMPONENT =============
 const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [activeProject, setActiveProject] = useState(null);
+  const [tappedProject, setTappedProject] = useState(null); // NEW: For mobile tap
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [hoveredFeature, setHoveredFeature] = useState(null);
   const [hoveredBox, setHoveredBox] = useState(null);
@@ -584,6 +910,41 @@ const Home = () => {
   });
   
   const heroRef = useRef(null);
+
+  // Detect if device is touch-enabled
+  const isTouchDevice = () => {
+    return (('ontouchstart' in window) ||
+      (navigator.maxTouchPoints > 0) ||
+      (navigator.msMaxTouchPoints > 0));
+  };
+
+  // Handle project tap for mobile
+  const handleProjectTap = (projectId) => {
+    if (tappedProject === projectId) {
+      // If already tapped, close it
+      setTappedProject(null);
+    } else {
+      // Open new tapped project
+      setTappedProject(projectId);
+      // Auto close after 3 seconds
+      setTimeout(() => {
+        setTappedProject(null);
+      }, 3000);
+    }
+  };
+
+  // Handle project hover for desktop
+  const handleProjectHover = (projectId) => {
+    if (!isTouchDevice()) {
+      setActiveProject(projectId);
+    }
+  };
+
+  const handleProjectHoverEnd = () => {
+    if (!isTouchDevice()) {
+      setActiveProject(null);
+    }
+  };
 
   // OPTIMIZED: Debounced scroll handler for better performance
   useEffect(() => {
@@ -606,7 +967,6 @@ const Home = () => {
   // OPTIMIZED: Debounced mouse move for better performance
   useEffect(() => {
     let rafId = null;
-    let ticking = false;
     
     const handleMouseMove = (e) => {
       if (rafId) return;
@@ -815,7 +1175,7 @@ const Home = () => {
       id: 1,
       title: 'Modern Kitchen',
       category: 'Modular',
-      image: '/modular.jpg',
+      image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       likes: 234,
       views: 1234,
       area: '320 sq ft'
@@ -895,181 +1255,19 @@ const Home = () => {
     visible: { x: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
-  // NEW: Unique card animation variants - EACH CARD HAS DIFFERENT ANIMATION
-  const cardVariants = [
-    // Card 1 - Flip from left with rotation
-    {
-      hidden: { opacity: 0, x: -100, rotateY: -45 },
-      visible: { 
-        opacity: 1, 
-        x: 0, 
-        rotateY: 0,
-        transition: { 
-          type: "spring", 
-          stiffness: 80,
-          damping: 12,
-          duration: 0.8
-        }
-      }
-    },
-    // Card 2 - Pop from bottom with scale
-    {
-      hidden: { opacity: 0, y: 100, scale: 0.5 },
-      visible: { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1,
-        transition: { 
-          type: "spring", 
-          stiffness: 120,
-          damping: 14,
-          duration: 0.8
-        }
-      }
-    },
-    // Card 3 - Spin and fade
-    {
-      hidden: { opacity: 0, rotate: -180, scale: 0.3 },
-      visible: { 
-        opacity: 1, 
-        rotate: 0, 
-        scale: 1,
-        transition: { 
-          type: "spring", 
-          stiffness: 70,
-          damping: 10,
-          duration: 0.9
-        }
-      }
-    },
-    // Card 4 - Slide from right with bounce
-    {
-      hidden: { opacity: 0, x: 100, skewX: 15 },
-      visible: { 
-        opacity: 1, 
-        x: 0, 
-        skewX: 0,
-        transition: { 
-          type: "spring", 
-          stiffness: 90,
-          damping: 13,
-          duration: 0.8
-        }
-      }
-    }
-  ];
-
-  // NEW: Box animation variants for the 4 boxes - EACH BOX HAS DIFFERENT ANIMATION
-  const boxVariants = [
-    // Box 1 - Slide from left with fade
-    {
-      hidden: { opacity: 0, x: -50 },
-      visible: { 
-        opacity: 1, 
-        x: 0,
-        transition: { 
-          duration: 0.6, 
-          ease: "easeOut",
-          delay: 0.1
-        }
-      },
-      hover: {
-        scale: 1.05,
-        rotate: 2,
-        boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
-        transition: { type: "spring", stiffness: 300 }
-      },
-      iconHover: {
-        rotate: 360,
-        scale: 1.2,
-        backgroundColor: "var(--gold-dark)",
-        transition: { type: "spring", stiffness: 200 }
-      }
-    },
-    // Box 2 - Pop from bottom
-    {
-      hidden: { opacity: 0, y: 50 },
-      visible: { 
-        opacity: 1, 
-        y: 0,
-        transition: { 
-          type: "spring", 
-          stiffness: 150,
-          damping: 15,
-          delay: 0.2
-        }
-      },
-      hover: {
-        scale: 1.05,
-        rotate: -2,
-        boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
-        transition: { type: "spring", stiffness: 300 }
-      },
-      iconHover: {
-        rotate: -360,
-        scale: 1.2,
-        backgroundColor: "var(--gold-dark)",
-        transition: { type: "spring", stiffness: 200 }
-      }
-    },
-    // Box 3 - Zoom with fade
-    {
-      hidden: { opacity: 0, scale: 0.5 },
-      visible: { 
-        opacity: 1, 
-        scale: 1,
-        transition: { 
-          type: "spring", 
-          stiffness: 120,
-          damping: 12,
-          delay: 0.3
-        }
-      },
-      hover: {
-        scale: 1.05,
-        rotate: 3,
-        boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
-        transition: { type: "spring", stiffness: 300 }
-      },
-      iconHover: {
-        rotate: 180,
-        scale: 1.2,
-        backgroundColor: "var(--gold-dark)",
-        transition: { type: "spring", stiffness: 200 }
-      }
-    },
-    // Box 4 - Slide from right with bounce
-    {
-      hidden: { opacity: 0, x: 50 },
-      visible: { 
-        opacity: 1, 
-        x: 0,
-        transition: { 
-          type: "spring", 
-          stiffness: 100,
-          damping: 10,
-          delay: 0.4
-        }
-      },
-      hover: {
-        scale: 1.05,
-        rotate: -3,
-        boxShadow: "0 20px 40px rgba(201, 169, 110, 0.25)",
-        transition: { type: "spring", stiffness: 300 }
-      },
-      iconHover: {
-        rotate: 270,
-        scale: 1.2,
-        backgroundColor: "var(--gold-dark)",
-        transition: { type: "spring", stiffness: 200 }
-      }
-    }
-  ];
-
   // ✅ Show skeleton while loading
   if (loading) {
     return <HomeSkeleton />;
   }
+
+  // Determine which project overlay to show (hover for desktop, tap for mobile)
+  const getActiveOverlay = (projectId) => {
+    if (isTouchDevice()) {
+      return tappedProject === projectId;
+    } else {
+      return activeProject === projectId;
+    }
+  };
 
   return (
     <div className="mk-home">
@@ -1147,7 +1345,6 @@ const Home = () => {
         <link rel="canonical" href="https://newpremglasshouse.com/" />
       </Helmet>
 
-      {/* ===== YOUR ORIGINAL UI - EXACTLY AS BEFORE ===== */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Jost:wght@200;300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -1203,11 +1400,13 @@ const Home = () => {
         @media (max-width: 1200px) {
           .container { padding: 0 3rem; }
         }
+        
         @media (max-width: 768px) {
-          .container { padding: 0 2rem; }
+          .container { 
+            padding: 0 1.5rem; 
+          }
         }
 
-        /* ===== HERO SECTION ===== */
         .mk-hero {
           position: relative;
           height: 100vh;
@@ -1264,11 +1463,9 @@ const Home = () => {
           width: 100%;
           padding: 0 6vw 8vh;
           transform: translateY(-40px);
-          /* FIX: Move content more to the left for PC */
           margin-left: -2vw;
         }
 
-        /* For larger screens, push content even more left */
         @media (min-width: 1400px) {
           .mk-hero__content {
             margin-left: -5vw;
@@ -1427,16 +1624,10 @@ const Home = () => {
           margin-top: 4px;
         }
 
-        /* ===== SCROLL INDICATOR - REMOVED ===== */
-        .mk-hero__scroll {
+        .mobile-stats-container {
           display: none;
         }
 
-        .mk-scroll-line {
-          display: none;
-        }
-
-        /* ─── MARQUEE STRIP ─────────────────────────── */
         .mk-marquee {
           background: var(--gold);
           overflow: hidden;
@@ -1476,7 +1667,6 @@ const Home = () => {
           to { transform: translateX(-50%); }
         }
 
-        /* ─── SECTION COMMONS ───────────────────────── */
         .mk-section {
           padding: 120px 6vw;
           position: relative;
@@ -1527,7 +1717,6 @@ const Home = () => {
         .mk-h2--light { color: var(--warm-white); }
         .mk-h2 em { font-style: italic; color: var(--gold); }
 
-        /* ABOUT CARD STYLE */
         .mk-about-card {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -1587,7 +1776,6 @@ const Home = () => {
           pointer-events: none;
         }
 
-        /* Corner Accents */
         .mk-about-card__corner {
           position: absolute;
           width: 40px;
@@ -1610,7 +1798,6 @@ const Home = () => {
           border-top: none;
         }
 
-        /* Experience Badge */
         .mk-about-card__badge {
           position: absolute;
           bottom: 30px;
@@ -1659,7 +1846,6 @@ const Home = () => {
           opacity: 0.8;
         }
 
-        /* Content Side */
         .mk-about-card__content {
           padding: 80px 60px;
           display: flex;
@@ -1752,7 +1938,6 @@ const Home = () => {
           color: var(--dark);
         }
 
-        /* Stats Row */
         .mk-about-card__stats {
           display: flex;
           align-items: center;
@@ -1792,7 +1977,6 @@ const Home = () => {
           background: rgba(0,0,0,0.1);
         }
 
-        /* UNIQUE CARDS SECTION */
         .expertise-section {
           position: relative;
           padding: 100px 0;
@@ -1829,7 +2013,6 @@ const Home = () => {
           z-index: 2;
         }
 
-        /* Unique Card Design */
         .unique-card {
           position: relative;
           background: white;
@@ -1843,7 +2026,7 @@ const Home = () => {
           display: flex;
           flex-direction: column;
           height: 100%;
-          text-decoration: none !important; /* Remove underline */
+          text-decoration: none !important;
           transform-style: preserve-3d;
           perspective: 1000px;
         }
@@ -2016,7 +2199,6 @@ const Home = () => {
           transform: translateX(8px);
         }
 
-        /* ANIMATED PROJECTS SECTION */
         .projects-section-unique {
           padding: 100px 0;
           background: white;
@@ -2078,6 +2260,12 @@ const Home = () => {
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        /* Mobile tap feedback */
+        .project-card-unique.tapped {
+          transform: translateY(-5px);
+          box-shadow: var(--shadow-gold);
+        }
+
         .project-card-unique.large {
           grid-column: span 2;
           grid-row: span 2;
@@ -2110,6 +2298,10 @@ const Home = () => {
           transform: scale(1.1);
         }
 
+        .project-card-unique.tapped .project-image-unique {
+          transform: scale(1.05);
+        }
+
         .project-overlay-unique {
           position: absolute;
           inset: 0;
@@ -2128,6 +2320,11 @@ const Home = () => {
         }
 
         .project-card-unique:hover .project-overlay-unique {
+          opacity: 1;
+        }
+
+        /* For mobile tap - show overlay when tapped */
+        .project-card-unique.tapped .project-overlay-unique {
           opacity: 1;
         }
 
@@ -2174,7 +2371,10 @@ const Home = () => {
 
         .project-card-unique:hover .project-category-unique,
         .project-card-unique:hover .project-title-unique,
-        .project-card-unique:hover .project-meta-unique {
+        .project-card-unique:hover .project-meta-unique,
+        .project-card-unique.tapped .project-category-unique,
+        .project-card-unique.tapped .project-title-unique,
+        .project-card-unique.tapped .project-meta-unique {
           transform: translateY(0);
         }
 
@@ -2211,7 +2411,8 @@ const Home = () => {
           z-index: 3;
         }
 
-        .project-card-unique:hover .project-view-btn {
+        .project-card-unique:hover .project-view-btn,
+        .project-card-unique.tapped .project-view-btn {
           opacity: 1;
           transform: scale(1);
         }
@@ -2245,7 +2446,6 @@ const Home = () => {
           transform: translateY(-3px);
         }
 
-        /* TESTIMONIALS */
         .mk-testimonials {
           position: relative;
           overflow: hidden;
@@ -2355,7 +2555,6 @@ const Home = () => {
           color: var(--gold);
         }
 
-        /* CTA */
         .mk-cta {
           position: relative;
           min-height: 520px;
@@ -2456,7 +2655,6 @@ const Home = () => {
         .mk-btn-outline-gold:hover { color: var(--dark); }
         .mk-btn-outline-gold span, .mk-btn-outline-gold svg { position: relative; z-index: 1; }
 
-        /* ===== PHONE OPTIMIZATION ===== */
         @media (max-width: 1200px) {
           .expertise-grid { grid-template-columns: repeat(2, 1fr); }
           .projects-grid-unique { 
@@ -2468,7 +2666,6 @@ const Home = () => {
           .project-card-unique.medium,
           .project-card-unique.small { height: 350px; }
           .mk-testimonials__grid { grid-template-columns: repeat(2, 1fr); }
-          .mk-hero__stats { display: none; }
         }
 
         @media (max-width: 1024px) {
@@ -2497,35 +2694,98 @@ const Home = () => {
 
         @media (max-width: 768px) {
           .mk-hero {
-            min-height: 600px;
-            margin-top: -80px;
+            min-height: 100vh;
+            height: -webkit-fill-available;
+            margin-top: -60px;
+            display: flex;
+            align-items: center;
+            padding: 0;
           }
           
           .mk-hero__content {
-            padding: 0 5vw 6vh;
-            transform: translateY(-45px);
-            /* Reset left margin on mobile */
+            padding: 80px 4vw 20px;
+            transform: translateY(0);
             margin-left: 0;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
           }
           
           .mk-hero__eyebrow {
-            margin-bottom: 0.5rem;
+            margin-bottom: 15px;
+            gap: 10px;
+          }
+          
+          .mk-hero__eyebrow-line {
+            width: 30px;
           }
           
           .mk-hero__eyebrow span {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
           }
           
           .mk-hero__title {
-            font-size: 3rem;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            line-height: 1.1;
+          }
+
+          .mk-hero__subtitle {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            max-width: 100%;
+            line-height: 1.6;
+          }
+
+          .mobile-stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 10px 0 25px;
+            width: 100%;
+          }
+
+          .mobile-stat-item {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+          }
+
+          .mobile-stat-value {
+            font-family: var(--serif);
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--gold);
+            line-height: 1;
+          }
+
+          .mobile-stat-label {
+            font-family: var(--sans);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: right;
           }
 
           .mk-hero__actions {
+            display: flex;
             flex-direction: column;
-            align-items: stretch;
-            gap: 1rem;
+            gap: 12px;
             width: 100%;
-            max-width: 300px;
+            margin-top: 10px;
           }
 
           .mk-btn-primary,
@@ -2534,109 +2794,177 @@ const Home = () => {
             justify-content: center;
             text-align: center;
             padding: 0 1rem;
-          }
-
-          .mk-btn-primary {
-            height: 50px;
-            font-size: 0.85rem;
-            border-radius: 25px;
-          }
-
-          .mk-btn-ghost {
-            height: 46px;
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 0;
-            line-height: 46px;
-          }
-          
-          .expertise-grid { grid-template-columns: 1fr; }
-          .projects-grid-unique { grid-template-columns: 1fr; }
-          .project-card-unique.large,
-          .project-card-unique.medium,
-          .project-card-unique.small { 
-            grid-column: span 1; 
-            height: 350px; 
-          }
-          .mk-testimonials__grid { grid-template-columns: 1fr; }
-          .mk-about-card__features { grid-template-columns: 1fr; }
-          .mk-about-card__stats {
-            flex-direction: column;
-            gap: 20px;
-          }
-          .mk-about-card__stat-divider {
-            width: 80px;
-            height: 1px;
-          }
-          .mk-section { padding: 80px 5vw; }
-        }
-
-        @media (max-width: 480px) {
-          .mk-hero {
-            margin-top: -70px;
-            min-height: 550px;
-          }
-          
-          .mk-hero__content {
-            padding: 0 4vw 5vh;
-            transform: translateY(-40px);
-            margin-left: 0;
-          }
-          
-          .mk-hero__title { 
-            font-size: 2.5rem; 
-          }
-          
-          .mk-hero__subtitle {
-            font-size: 0.85rem;
-            margin-bottom: 2rem;
-          }
-
-          .mk-hero__actions {
-            max-width: 100%;
-            gap: 0.8rem;
-          }
-
-          .mk-btn-primary {
             height: 48px;
             font-size: 0.8rem;
+          }
+
+          .mk-btn-primary {
             border-radius: 24px;
           }
 
           .mk-btn-ghost {
             height: 42px;
-            font-size: 0.8rem;
             line-height: 42px;
+          }
+          
+          .mk-hero__stats {
+            display: none;
+          }
+
+          .expertise-grid { 
+            grid-template-columns: 1fr; 
+            gap: 20px;
+          }
+          
+          .projects-grid-unique { 
+            grid-template-columns: 1fr; 
+            gap: 15px;
+          }
+          
+          .project-card-unique.large,
+          .project-card-unique.medium,
+          .project-card-unique.small { 
+            grid-column: span 1; 
+            height: 300px; 
+          }
+          
+          .mk-testimonials__grid { 
+            grid-template-columns: 1fr; 
+            gap: 20px;
+            margin-top: 30px;
+          }
+          
+          .mk-about-card__features { 
+            grid-template-columns: 1fr; 
+            gap: 15px;
+          }
+          
+          .mk-about-card__stats {
+            flex-direction: column;
+            gap: 15px;
+          }
+          
+          .mk-about-card__stat-divider {
+            width: 80px;
+            height: 1px;
+          }
+          
+          .mk-section { 
+            padding: 60px 5vw; 
+          }
+          
+          .expertise-section {
+            padding: 60px 0;
+          }
+          
+          .projects-section-unique {
+            padding: 60px 0;
+          }
+          
+          .mk-cta__content {
+            padding: 40px 20px;
+          }
+          
+          .mk-cta__title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+          }
+          
+          .mk-cta__subtitle {
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+          }
+          
+          .mk-testimonial-card {
+            padding: 2rem 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .mk-hero__content {
+            padding: 160px 4vw 15px;
+          }
+          
+          .mk-hero__title { 
+            font-size: 4.5rem;
+            margin-bottom: 12px;
+          }
+          
+          .mk-hero__subtitle {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+          }
+          
+          .mobile-stat-item {
+            padding: 12px 16px;
+          }
+          
+          .mobile-stat-value {
+            font-size: 1.6rem;
+          }
+          
+          .mobile-stat-label {
+            font-size: 0.85rem;
+          }
+
+          .card-title-unique {
+            font-size: 1.4rem;
+          }
+          
+          .project-title-unique {
+            font-size: 1.4rem;
+          }
+          
+          .project-card-unique.large .project-title-unique {
+            font-size: 1.8rem;
           }
         }
 
         @media (max-width: 360px) {
-          .mk-hero {
-            margin-top: -60px;
-          }
-          
           .mk-hero__content {
-            transform: translateY(-35px);
+            padding: 80px 4vw 10px;
           }
           
           .mk-hero__title {
-            font-size: 2.2rem;
+            font-size: 2.6rem;
+            margin-bottom: 10px;
           }
+          
+          .mk-hero__subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+          }
+          
+          .mobile-stat-item {
+            padding: 10px 14px;
+          }
+          
+          .mobile-stat-value {
+            font-size: 1.4rem;
+          }
+          
+          .mobile-stat-label {
+            font-size: 0.8rem;
+          }
+        }
 
-          .mk-btn-primary {
-            height: 44px;
-            font-size: 0.75rem;
-          }
+        .mk-hero__scroll {
+          display: none;
+        }
 
-          .mk-btn-ghost {
-            height: 38px;
-            font-size: 0.75rem;
-            line-height: 38px;
-          }
+        .mk-scroll-line {
+          display: none;
         }
       `}</style>
 
       {/* ─── HERO ─────────────────────────────────────────── */}
-      <section className="mk-hero">
+      <motion.section 
+        className="mk-hero"
+        ref={heroRef}
+        variants={heroVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="mk-hero__bg">
           <img
             src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1600"
@@ -2652,11 +2980,7 @@ const Home = () => {
 
         <div className="container">
           <div className="mk-hero__content">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-            >
+            <motion.div variants={heroItemVariants}>
               <div className="mk-hero__eyebrow">
                 <div className="mk-hero__eyebrow-line" />
                 <span>Since 2010 · Jharsuguda, Odisha</span>
@@ -2666,9 +2990,7 @@ const Home = () => {
             <div style={{ overflow: 'hidden' }}>
               <motion.h1
                 className="mk-hero__title"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                variants={heroTitleVariants}
               >
                 Your Trusted<br />
                 <em>Interior Partner</em>
@@ -2677,20 +2999,53 @@ const Home = () => {
 
             <motion.p
               className="mk-hero__subtitle"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
+              variants={heroItemVariants}
             >
               Proudly serving Jharsuguda for over a decade with premium
               glass products, modular interiors, and expert craftsmanship.
             </motion.p>
 
-            {/* OPTIMIZED BUTTONS */}
+            <motion.div 
+              className="mobile-stats-container"
+              variants={heroItemVariants}
+            >
+              <motion.div 
+                className="mobile-stat-item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+              >
+                <div className="mobile-stat-value">{stats.years}</div>
+                <div className="mobile-stat-label">YEARS EXPERIENCE</div>
+              </motion.div>
+              
+              <motion.div 
+                className="mobile-stat-item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+              >
+                <div className="mobile-stat-value">{stats.clients}</div>
+                <div className="mobile-stat-label">HAPPY CLIENTS</div>
+              </motion.div>
+              
+              <motion.div 
+                className="mobile-stat-item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+              >
+                <div className="mobile-stat-value">{totalProducts > 0 ? totalProducts + '+' : stats.products}</div>
+                <div className="mobile-stat-label">PRODUCTS</div>
+              </motion.div>
+            </motion.div>
+
             <motion.div
               className="mk-hero__actions"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
+              variants={heroItemVariants}
             >
               <Link to="/contact" className="mk-btn-primary">
                 <span>Get Free Quote</span>
@@ -2703,7 +3058,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Right-side stats - Updated with real product count */}
         <motion.div
           className="mk-hero__stats"
           initial={{ opacity: 0, x: 30 }}
@@ -2721,7 +3075,7 @@ const Home = () => {
             </div>
           ))}
         </motion.div>
-      </section>
+      </motion.section>
 
       {/* ─── MARQUEE ──────────────────────────────────────── */}
       <div className="mk-marquee">
@@ -2761,7 +3115,6 @@ const Home = () => {
                 <div className="mk-about-card__overlay-gradient"></div>
               </div>
               
-              {/* Experience Badge */}
               <motion.div 
                 className="mk-about-card__badge"
                 initial={{ scale: 0 }}
@@ -2777,7 +3130,6 @@ const Home = () => {
                 </div>
               </motion.div>
 
-              {/* Corner Accents */}
               <div className="mk-about-card__corner corner-tl"></div>
               <div className="mk-about-card__corner corner-br"></div>
             </div>
@@ -2802,7 +3154,6 @@ const Home = () => {
               to quality and design excellence.
             </motion.p>
 
-            {/* 4 BOXES WITH UNIQUE ANIMATIONS - EACH BOX DIFFERENT */}
             <motion.div className="mk-about-card__features" variants={staggerContainer}>
               {[
                 { icon: <FaStore />, title: 'Prime Location', desc: 'Bombay Chowk, Jharsuguda' },
@@ -2813,7 +3164,7 @@ const Home = () => {
                 <motion.div 
                   className="mk-about-card__feature" 
                   key={i}
-                  variants={boxVariants[i]} // Each box gets its own unique animation
+                  variants={i === 0 ? boxVariant1 : i === 1 ? boxVariant2 : i === 2 ? boxVariant3 : boxVariant4}
                   initial="hidden"
                   whileInView="visible"
                   whileHover="hover"
@@ -2823,8 +3174,12 @@ const Home = () => {
                 >
                   <motion.div 
                     className="mk-about-card__feature-icon"
-                    animate={hoveredBox === i ? "iconHover" : {}}
-                    variants={boxVariants[i]}
+                    animate={hoveredBox === i ? { 
+                      rotate: 360,
+                      scale: 1.2,
+                      backgroundColor: "var(--gold-dark)"
+                    } : {}}
+                    transition={{ duration: 0.5 }}
                   >
                     {f.icon}
                   </motion.div>
@@ -2836,7 +3191,6 @@ const Home = () => {
               ))}
             </motion.div>
 
-            {/* Stats Row */}
             <motion.div className="mk-about-card__stats" variants={fadeInUp}>
               <div className="mk-about-card__stat-item">
                 <span className="mk-about-card__stat-number">{stats.projects}</span>
@@ -2857,7 +3211,7 @@ const Home = () => {
         </div>
       </motion.section>
 
-      {/* EXPERTISE SECTION - 4 CARDS WITH UNIQUE ANIMATIONS - EACH CARD DIFFERENT */}
+      {/* EXPERTISE SECTION - 4 CARDS WITH UNIQUE ANIMATIONS */}
       <section className="expertise-section">
         <div className="expertise-bg-pattern"></div>
         <div className="container">
@@ -2890,11 +3244,10 @@ const Home = () => {
             {categories.map((cat, index) => (
               <motion.div
                 key={index}
-                variants={cardVariants[index]} // Each card gets its own unique animation
+                variants={index === 0 ? cardVariant1 : index === 1 ? cardVariant2 : index === 2 ? cardVariant3 : cardVariant4}
                 initial="hidden"
                 whileInView="visible"
                 whileHover="hover"
-                whileTap="tap"
                 viewport={{ once: true, amount: 0.3 }}
                 onHoverStart={() => setHoveredCategory(index)}
                 onHoverEnd={() => setHoveredCategory(null)}
@@ -2972,7 +3325,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* PROJECTS SECTION */}
+      {/* PROJECTS SECTION - WITH MOBILE TAP SUPPORT */}
       <section className="projects-section-unique">
         <div className="projects-bg-text">Portfolio</div>
         <div className="container">
@@ -3005,7 +3358,6 @@ const Home = () => {
             viewport={{ once: true, amount: 0.1 }}
           >
             {projects.map((project, index) => {
-              // Assign different classes based on index
               let cardClass = 'small';
               if (index === 0) cardClass = 'large';
               else if (index === 1) cardClass = 'medium';
@@ -3013,14 +3365,18 @@ const Home = () => {
               else if (index === 3) cardClass = 'medium';
               else if (index === 4) cardClass = 'small';
               
+              const isOverlayActive = getActiveOverlay(project.id);
+              
               return (
                 <motion.div
                   key={project.id}
-                  className={`project-card-unique ${cardClass}`}
-                  variants={fadeInScale}
-                  whileHover="hover"
-                  onHoverStart={() => setActiveProject(project.id)}
-                  onHoverEnd={() => setActiveProject(null)}
+                  className={`project-card-unique ${cardClass} ${isOverlayActive ? 'tapped' : ''}`}
+                  custom={index}
+                  variants={projectVariants}
+                  whileHover={!isTouchDevice() ? "hover" : undefined}
+                  onHoverStart={() => handleProjectHover(project.id)}
+                  onHoverEnd={handleProjectHoverEnd}
+                  onClick={() => handleProjectTap(project.id)}
                 >
                   <img
                     className="project-image-unique"
@@ -3030,7 +3386,7 @@ const Home = () => {
                   />
                   
                   <AnimatePresence>
-                    {activeProject === project.id && (
+                    {isOverlayActive && (
                       <motion.div
                         className="project-overlay-unique"
                         initial={{ opacity: 0 }}
@@ -3109,7 +3465,6 @@ const Home = () => {
 
           <motion.div
             className="mk-testimonials__grid"
-            variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
@@ -3118,8 +3473,9 @@ const Home = () => {
               <motion.div
                 className="mk-testimonial-card"
                 key={i}
-                variants={fadeInUp}
-                whileHover={{ y: -5 }}
+                custom={i}
+                variants={testimonialVariants}
+                whileHover="hover"
               >
                 <div className="mk-testimonial__quote-icon">
                   <FaQuoteLeft />
@@ -3174,7 +3530,7 @@ const Home = () => {
               <FaArrowRight />
             </Link>
             <a href="tel:+917328019093" className="mk-btn-outline-gold">
-              <FaPhone />
+               <FaPhone style={{ transform: 'rotate(90deg)' }} />
               <span>Call Now</span>
             </a>
           </div>

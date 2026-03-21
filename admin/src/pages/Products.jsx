@@ -9,8 +9,8 @@ import toast from "react-hot-toast";
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith('http')) return imagePath;
-  if (imagePath.startsWith('/uploads')) return `http://localhost:5000${imagePath}`;
-  return `http://localhost:5000/uploads/${imagePath}`;
+  if (imagePath.startsWith('/uploads')) return `api.newpremglasshouse.in${imagePath}`;
+  return `api.newpremglasshouse.in/uploads/${imagePath}`;
 };
 // ============================================
 

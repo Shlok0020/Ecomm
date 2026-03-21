@@ -18,6 +18,17 @@ import {
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
+
+
+
+// ============= HELPER FUNCTION FOR IMAGE URL =============
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/300x200?text=No+Image';
+  if (imagePath.startsWith('http')) return imagePath;
+  if (imagePath.startsWith('/uploads')) return `api.newpremglasshouse.in${imagePath}`;
+  return `api.newpremglasshouse.in/uploads/${imagePath}`;
+};
+
 const Cart = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
@@ -198,7 +209,7 @@ const Cart = () => {
       }
 
       // Send to backend
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch('api.newpremglasshouse.in/api/orders', {
         method: 'POST',
         headers,
         body: JSON.stringify(orderData)

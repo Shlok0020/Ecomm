@@ -2,7 +2,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "http://api.newpremglasshouse.in/api";
 
 console.log("🔌 API URL:", API_URL);
 
@@ -82,7 +82,7 @@ api.interceptors.response.use(
             
             // 🔴 FIX: Redirect to FRONTEND login page
             setTimeout(() => {
-              window.location.href = "http://localhost:5173/login";
+              window.location.href = "https://newpremglasshouse.in/login";
             }, 1500);
           }
           break;

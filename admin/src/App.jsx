@@ -1,3 +1,4 @@
+// admin/src/App.jsx - UI SAME, SIRF REDIRECT FIXED
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
@@ -14,7 +15,7 @@ import Users from './pages/Users';
 import Settings from './pages/Settings';
 
 // API URL
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://api.newpremglasshouse.in/api';
 
 // Set axios defaults
 axios.defaults.baseURL = API_URL;
@@ -22,6 +23,25 @@ axios.defaults.baseURL = API_URL;
 function App() {
   const [isAdmin, setIsAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Check window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Check URL parameters first (when redirected from login)
@@ -72,11 +92,12 @@ function App() {
           userRole: user?.role
         });
 
-        // If no token or user data, not admin
+        // 🔴 IMPORTANT: Agar token nahi hai to seedha redirect
         if (!token || !user) {
-          console.log('❌ No token or user data');
+          console.log('❌ No token or user data - redirecting to login');
           setIsAdmin(false);
           setLoading(false);
+          window.location.href = 'https://newpremglasshouse.in/login';
           return;
         }
 
@@ -85,6 +106,7 @@ function App() {
           console.log('❌ User is not admin:', user.role);
           setIsAdmin(false);
           setLoading(false);
+          window.location.href = 'https://newpremglasshouse.in/login';
           return;
         }
 
@@ -100,14 +122,14 @@ function App() {
         } else {
           console.log('❌ Backend verification failed');
           setIsAdmin(false);
-          // Clear invalid data
           localStorage.removeItem('user');
+          window.location.href = 'https://newpremglasshouse.in/login';
         }
       } catch (error) {
         console.error('❌ Auth check failed:', error);
         setIsAdmin(false);
-        // Clear invalid data on error
         localStorage.removeItem('user');
+        window.location.href = 'https://newpremglasshouse.in/login';
       } finally {
         setLoading(false);
       }
@@ -115,6 +137,10 @@ function App() {
 
     checkAdminStatus();
   }, []);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   // Show loading spinner
   if (loading) {
@@ -145,31 +171,25 @@ function App() {
     );
   }
 
-  // Agar user admin nahi hai, toh FRONTEND LOGIN PAGE PE REDIRECT
+  // Agar admin nahi hai to kuch mat dikhao (redirect already ho chuka hai)
   if (!isAdmin) {
-    console.log('🚫 Not admin, redirecting to frontend login...');
-    // 🔴 FRONTEND LOGIN PAGE PE REDIRECT
-    window.location.href = 'http://localhost:5173/login';
-    return null; // Don't render anything while redirecting
+    return null;
   }
 
-  console.log('🔍 All routes available:');
-console.log('- /dashboard');
-console.log('- /products');
-console.log('- /categories');
-console.log('- /orders');
-console.log('- /users');
-console.log('- /settings');
-
-  // Admin is verified, show the panel
   return (
     <Router>
       <Toaster position="top-right" />
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
-        <Sidebar />
-        <div style={{ flex: 1, marginLeft: '260px' }}>
-          <Navbar />
-          <div style={{ padding: '2rem' }}>
+      <div className="app">
+        {/* Sidebar - Mobile mein slide-in hoga */}
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isMobile={isMobile} />
+        
+        {/* Main Content */}
+        <div className="main-content">
+          {/* Navbar with hamburger menu */}
+          <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={sidebarOpen} isMobile={isMobile} />
+          
+          {/* Page Content */}
+          <div className="content">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
@@ -185,6 +205,56 @@ console.log('- /settings');
           </div>
         </div>
       </div>
+
+      <style>{`
+        .app {
+          display: flex;
+          min-height: 100vh;
+          background: #f8f9fa;
+        }
+
+        .main-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          transition: margin-left 0.3s ease;
+        }
+
+        /* Desktop styles */
+        @media (min-width: 769px) {
+          .main-content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+          }
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+          .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+          }
+        }
+
+        .content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .content {
+            padding: 1rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .content {
+            padding: 0.75rem;
+          }
+        }
+      `}</style>
     </Router>
   );
 }

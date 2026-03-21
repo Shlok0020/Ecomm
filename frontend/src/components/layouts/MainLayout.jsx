@@ -1,17 +1,20 @@
-// src/components/layouts/MainLayout.jsx
+// src/components/layouts/MainLayout.jsx - Modified to accept both hideFooter and showFooter
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Navbar from '../common/Navbar';
 import Footer from '../common/Footer';
 import { PageTransitionLoader } from '../common/Loader';
-import { FaArrowUp, FaWhatsapp, FaPhone } from 'react-icons/fa';
+import { FaWhatsapp } from 'react-icons/fa';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, hideFooter = false, showFooter }) => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  
-  
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+
+  // Determine if footer should be shown
+  // If showFooter is provided, use that (inverted logic), otherwise use hideFooter
+  const shouldShowFooter = showFooter !== undefined ? showFooter : !hideFooter;
 
   // Scroll to top on route change
   useEffect(() => {
@@ -21,10 +24,9 @@ const MainLayout = ({ children }) => {
     });
   }, [location.pathname]);
 
-  // Handle scroll for back to top button and WhatsApp button
+  // Handle scroll for WhatsApp button
   useEffect(() => {
     const handleScroll = () => {
-      setScrollTop(window.scrollY);
       setShowWhatsApp(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
@@ -37,14 +39,6 @@ const MainLayout = ({ children }) => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, [location.pathname]);
-
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
 
   // Page transition variants
   const pageVariants = {
@@ -65,6 +59,40 @@ const MainLayout = ({ children }) => {
       y: -20,
       transition: {
         duration: 0.4
+      }
+    }
+  };
+
+  // WhatsApp button animation variants - ONLY JUMPING (NO RADIATION)
+  const whatsAppVariants = {
+    initial: { scale: 0, opacity: 0 },
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+        duration: 0.5
+      }
+    },
+    exit: { scale: 0, opacity: 0 },
+    hover: {
+      scale: 1.15,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    },
+    tap: { scale: 0.95 },
+    jump: {
+      y: [0, -12, 0, -6, 0],
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "easeInOut"
       }
     }
   };
@@ -91,12 +119,40 @@ const MainLayout = ({ children }) => {
         {children}
       </motion.main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer - Conditionally rendered based on shouldShowFooter */}
+      {shouldShowFooter && <Footer />}
 
-   
+      {/* Floating WhatsApp Button with ONLY JUMP Animation */}
+      <div className="floating-whatsapp">
+        <AnimatePresence>
+          {showWhatsApp && (
+            <motion.div
+              className="whatsapp-container"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={whatsAppVariants}
+            >
+              {/* WhatsApp Button with Jump Animation (NO RADIATION RINGS) */}
+              <motion.a
+                href="https://wa.me/917328019093"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whatsapp-button"
+                variants={whatsAppVariants}
+                whileHover="hover"
+                whileTap="tap"
+                animate="jump"
+                title="Chat on WhatsApp"
+              >
+                <FaWhatsapp />
+              </motion.a>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      <style js>{`
+      <style jsx>{`
         .main-layout {
           min-height: 100vh;
           display: flex;
@@ -104,7 +160,7 @@ const MainLayout = ({ children }) => {
           width: 100%;
           overflow-x: hidden;
           position: relative;
-          background: #f8f5f0; /* Warm white background */
+          background: #f8f5f0;
         }
 
         .main-content {
@@ -117,95 +173,99 @@ const MainLayout = ({ children }) => {
           z-index: 1;
         }
 
-       
-
-      
-
-        .back-to-top:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(201, 169, 110, 0.4);
+        .floating-whatsapp {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          z-index: 1000;
         }
 
+        .whatsapp-container {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-      
+        .whatsapp-button {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+          border: none;
+          outline: none;
+          background: linear-gradient(135deg, #25D366, #128C7E);
+          color: white;
+          font-size: 32px;
+          text-decoration: none;
+          position: relative;
+          z-index: 10;
+        }
+
+        .whatsapp-button:hover {
+          background: linear-gradient(135deg, #128C7E, #075E54);
+          box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+        }
+
         /* Responsive Styles */
-        @media (max-width: 1024px) {
-          .main-content {
-            padding: 0;
-          }
-        }
-
         @media (max-width: 768px) {
-          .main-content {
-            padding: 0;
-            margin-top: 0;
-          }
-
-          .floating-buttons {
+          .floating-whatsapp {
             bottom: 20px;
             right: 20px;
-            gap: 10px;
           }
 
-          .back-to-top,
+          .whatsapp-container {
+            width: 70px;
+            height: 70px;
+          }
+
           .whatsapp-button {
-            width: 45px;
-            height: 45px;
-            font-size: 18px;
-          }
-
-          .mobile-call-button {
-            display: flex;
-            bottom: 20px;
-            left: 20px;
-            width: 45px;
-            height: 45px;
-            font-size: 18px;
+            width: 50px;
+            height: 50px;
+            font-size: 28px;
           }
         }
 
         @media (max-width: 480px) {
-          .floating-buttons {
+          .floating-whatsapp {
             bottom: 15px;
             right: 15px;
           }
 
-          .back-to-top,
-          .whatsapp-button {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
+          .whatsapp-container {
+            width: 60px;
+            height: 60px;
           }
 
-          .mobile-call-button {
-            bottom: 15px;
-            left: 15px;
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
+          .whatsapp-button {
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
           }
         }
 
         /* Landscape Mode */
         @media (max-height: 500px) and (orientation: landscape) {
-          .floating-buttons {
+          .floating-whatsapp {
             bottom: 10px;
             right: 10px;
           }
 
-          .back-to-top,
-          .whatsapp-button {
-            width: 35px;
-            height: 35px;
-            font-size: 14px;
+          .whatsapp-container {
+            width: 60px;
+            height: 60px;
           }
 
-          .mobile-call-button {
-            bottom: 10px;
-            left: 10px;
-            width: 35px;
-            height: 35px;
-            font-size: 14px;
+          .whatsapp-button {
+            width: 40px;
+            height: 40px;
+            font-size: 22px;
           }
         }
       `}</style>
@@ -214,9 +274,12 @@ const MainLayout = ({ children }) => {
 };
 
 // ============= HOME PAGE LAYOUT =============
-export const HomeLayout = ({ children }) => {
+export const HomeLayout = ({ children, hideFooter = false, showFooter }) => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Determine if footer should be shown
+  const shouldShowFooter = showFooter !== undefined ? showFooter : !hideFooter;
 
   useEffect(() => {
     setIsLoading(true);
@@ -251,7 +314,9 @@ export const HomeLayout = ({ children }) => {
       >
         {children}
       </motion.main>
-      <Footer />
+      
+      {/* Footer - Conditionally rendered */}
+      {shouldShowFooter && <Footer />}
 
       <style jsx>{`
         .home-layout {
@@ -262,7 +327,7 @@ export const HomeLayout = ({ children }) => {
         }
         .home-content {
           flex: 1;
-          margin-top: -80px; /* Overlap with navbar for hero sections */
+          margin-top: -80px;
         }
         @media (max-width: 768px) {
           .home-content {
@@ -275,9 +340,12 @@ export const HomeLayout = ({ children }) => {
 };
 
 // ============= PRODUCT PAGE LAYOUT =============
-export const ProductLayout = ({ children }) => {
+export const ProductLayout = ({ children, hideFooter = false, showFooter }) => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Determine if footer should be shown
+  const shouldShowFooter = showFooter !== undefined ? showFooter : !hideFooter;
 
   useEffect(() => {
     setIsLoading(true);
@@ -312,7 +380,9 @@ export const ProductLayout = ({ children }) => {
           {children}
         </div>
       </motion.main>
-      <Footer />
+      
+      {/* Footer - Conditionally rendered */}
+      {shouldShowFooter && <Footer />}
 
       <style jsx>{`
         .product-layout {
@@ -388,7 +458,7 @@ export const AuthLayout = ({ children }) => {
             <span className="logo-sub">New Prem<br />Glass House</span>
           </div>
           <h2>Welcome Back!</h2>
-          <p>Access your admin dashboard to manage products, orders, and more.</p>
+          <p>Access your account to manage orders and more.</p>
         </div>
         <div className="auth-right">
           {children}
@@ -401,7 +471,7 @@ export const AuthLayout = ({ children }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #c9a96e 0%, #a07840 100%);
           padding: 20px;
         }
 
@@ -418,7 +488,7 @@ export const AuthLayout = ({ children }) => {
         .auth-left {
           flex: 1;
           padding: 40px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #c9a96e 0%, #a07840 100%);
           color: white;
           display: flex;
           flex-direction: column;

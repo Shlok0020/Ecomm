@@ -7,12 +7,12 @@ const PageSkeleton = () => {
       {/* Hero Section Skeleton */}
       <div className="skeleton-hero">
         <div className="skeleton-hero-content">
-          <div className="skeleton-badge"></div>
-          <div className="skeleton-title"></div>
-          <div className="skeleton-text"></div>
+          <div className="skeleton-badge shimmer"></div>
+          <div className="skeleton-title shimmer"></div>
+          <div className="skeleton-text shimmer"></div>
           <div className="skeleton-buttons">
-            <div className="skeleton-btn"></div>
-            <div className="skeleton-btn"></div>
+            <div className="skeleton-btn shimmer"></div>
+            <div className="skeleton-btn shimmer"></div>
           </div>
         </div>
       </div>
@@ -23,10 +23,10 @@ const PageSkeleton = () => {
           <div className="skeleton-stats-grid">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="skeleton-stat-card">
-                <div className="skeleton-stat-icon"></div>
+                <div className="skeleton-stat-icon shimmer"></div>
                 <div className="skeleton-stat-content">
-                  <div className="skeleton-stat-number"></div>
-                  <div className="skeleton-stat-label"></div>
+                  <div className="skeleton-stat-number shimmer"></div>
+                  <div className="skeleton-stat-label shimmer"></div>
                 </div>
               </div>
             ))}
@@ -38,20 +38,21 @@ const PageSkeleton = () => {
       <div className="skeleton-section">
         <div className="container">
           <div className="skeleton-header">
-            <div className="skeleton-title-small"></div>
-            <div className="skeleton-title-large"></div>
+            <div className="skeleton-title-small shimmer"></div>
+            <div className="skeleton-title-large shimmer"></div>
           </div>
           
           <div className="skeleton-grid">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="skeleton-card">
-                <div className="skeleton-card-image"></div>
+                <div className="skeleton-card-image shimmer"></div>
                 <div className="skeleton-card-content">
-                  <div className="skeleton-card-title"></div>
-                  <div className="skeleton-card-text"></div>
+                  <div className="skeleton-card-title shimmer"></div>
+                  <div className="skeleton-card-text shimmer"></div>
+                  <div className="skeleton-card-text shimmer" style={{ width: '60%' }}></div>
                   <div className="skeleton-card-footer">
-                    <div className="skeleton-price"></div>
-                    <div className="skeleton-button"></div>
+                    <div className="skeleton-price shimmer"></div>
+                    <div className="skeleton-button shimmer"></div>
                   </div>
                 </div>
               </div>
@@ -62,7 +63,7 @@ const PageSkeleton = () => {
 
       <style jsx>{`
         .page-skeleton {
-          background: var(--bg-primary);
+          background: #f8f5f0;
           min-height: 100vh;
         }
 
@@ -88,7 +89,6 @@ const PageSkeleton = () => {
           background: rgba(255,255,255,0.1);
           border-radius: 30px;
           margin: 0 auto 2rem;
-          animation: pulse 1.5s ease-in-out infinite;
         }
 
         .skeleton-title {
@@ -97,8 +97,6 @@ const PageSkeleton = () => {
           background: rgba(255,255,255,0.1);
           border-radius: 10px;
           margin: 0 auto 2rem;
-          animation: pulse 1.5s ease-in-out infinite;
-          animation-delay: 0.1s;
         }
 
         .skeleton-text {
@@ -107,8 +105,6 @@ const PageSkeleton = () => {
           background: rgba(255,255,255,0.1);
           border-radius: 8px;
           margin: 0 auto 3rem;
-          animation: pulse 1.5s ease-in-out infinite;
-          animation-delay: 0.2s;
         }
 
         .skeleton-buttons {
@@ -122,15 +118,6 @@ const PageSkeleton = () => {
           height: 54px;
           background: rgba(255,255,255,0.1);
           border-radius: 40px;
-          animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .skeleton-btn:first-child {
-          animation-delay: 0.3s;
-        }
-
-        .skeleton-btn:last-child {
-          animation-delay: 0.4s;
         }
 
         /* Stats Section */
@@ -163,9 +150,7 @@ const PageSkeleton = () => {
         .skeleton-stat-icon {
           width: 60px;
           height: 60px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 12px;
         }
 
@@ -176,9 +161,7 @@ const PageSkeleton = () => {
         .skeleton-stat-number {
           width: 80%;
           height: 32px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 6px;
           margin-bottom: 0.5rem;
         }
@@ -186,9 +169,7 @@ const PageSkeleton = () => {
         .skeleton-stat-label {
           width: 60%;
           height: 20px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 4px;
         }
 
@@ -201,9 +182,7 @@ const PageSkeleton = () => {
         .skeleton-title-small {
           width: 150px;
           height: 24px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 4px;
           margin: 0 auto 1rem;
         }
@@ -211,9 +190,7 @@ const PageSkeleton = () => {
         .skeleton-title-large {
           width: 300px;
           height: 48px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 8px;
           margin: 0 auto;
         }
@@ -234,9 +211,7 @@ const PageSkeleton = () => {
 
         .skeleton-card-image {
           height: 200px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
         }
 
         .skeleton-card-content {
@@ -246,9 +221,7 @@ const PageSkeleton = () => {
         .skeleton-card-title {
           width: 80%;
           height: 24px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 4px;
           margin-bottom: 1rem;
         }
@@ -256,9 +229,7 @@ const PageSkeleton = () => {
         .skeleton-card-text {
           width: 100%;
           height: 16px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 4px;
           margin-bottom: 0.5rem;
         }
@@ -273,29 +244,27 @@ const PageSkeleton = () => {
         .skeleton-price {
           width: 80px;
           height: 24px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 4px;
         }
 
         .skeleton-button {
           width: 100px;
           height: 36px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
+          background: #f0f0f0;
           border-radius: 20px;
         }
 
-        /* Animations */
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 0.8;
-          }
+        /* Shimmer Animation */
+        .shimmer {
+          background: linear-gradient(
+            90deg,
+            #f0f0f0 25%,
+            #e0e0e0 50%,
+            #f0f0f0 75%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
         }
 
         @keyframes shimmer {
@@ -330,16 +299,20 @@ const PageSkeleton = () => {
           .skeleton-title {
             height: 60px;
           }
+          
+          .skeleton-buttons {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          .skeleton-btn {
+            width: 100%;
+          }
         }
 
         @media (max-width: 480px) {
           .skeleton-stats-grid {
             grid-template-columns: 1fr;
-          }
-          
-          .skeleton-buttons {
-            flex-direction: column;
-            align-items: center;
           }
         }
       `}</style>

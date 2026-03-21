@@ -3,7 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 // Get API URL from environment
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'api.newpremglasshouse.in/api';
 const IS_PRODUCTION = import.meta.env.PROD;
 
 console.log('🔌 API URL:', API_URL);

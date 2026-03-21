@@ -196,7 +196,7 @@ const sendNewRegistrationNotification = async (userData) => {
           </div>
           
           <div style="text-align: center;">
-            <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/users" class="button">
+            <a href="${process.env.CLIENT_URL || 'https://newpremglasshouse.in'}/admin/users" class="button">
               View in Admin Panel
             </a>
           </div>
@@ -221,7 +221,7 @@ const sendNewRegistrationNotification = async (userData) => {
 • Role: ${role}
 • Registered: ${formatDate(createdAt)}
 
-View in Admin Panel: ${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/users
+View in Admin Panel: ${process.env.CLIENT_URL || 'https://newpremglasshouse.in'}/admin/users
   `.trim();
 
   // Send to admin
@@ -339,7 +339,7 @@ const sendNewOrderNotification = async (orderData) => {
           </table>
 
           <div style="text-align: center;">
-            <a href="${process.env.ADMIN_URL || 'http://localhost:5174'}/orders/${orderId}" class="button">
+            <a href="${process.env.ADMIN_URL || 'https://admin.newpremglasshouse.in'}/orders/${orderId}" class="button">
               View Order Details
             </a>
           </div>
@@ -377,7 +377,7 @@ ${itemsSummary}
 📊 *Status: ${status}*
 
 ━━━━━━━━━━━━━━━━━━━━━
-View in Admin Panel: ${process.env.ADMIN_URL || 'http://localhost:5174'}/orders/${orderId}
+View in Admin Panel: ${process.env.ADMIN_URL || 'https://newpremglasshouse.in'}/orders/${orderId}
   `.trim();
 
   // Send to admin
@@ -457,7 +457,7 @@ const sendOrderStatusNotification = async (orderData) => {
 
           <div style="text-align: center;">
             <p>Track your order status in real-time:</p>
-            <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/my-orders/${orderId}" class="button">
+            <a href="${process.env.CLIENT_URL || 'https://newpremglasshouse.in'}/my-orders/${orderId}" class="button">
               Track Order
             </a>
           </div>
@@ -486,7 +486,7 @@ Your order *#${orderId}* status has been updated to:
 💰 *Total Amount:* ${formatCurrency(totalAmount)}
 📅 *Update Time:* ${formatDate(new Date())}
 
-Track your order: ${process.env.CLIENT_URL || 'http://localhost:5173'}/my-orders/${orderId}
+Track your order: ${process.env.CLIENT_URL || 'https://newpremglasshouse.in'}/my-orders/${orderId}
 
 Thank you for choosing New Prem Glass House!
   `.trim();
@@ -553,7 +553,7 @@ const sendWelcomeEmail = async (userData) => {
             <li>Get exclusive offers and updates</li>
           </ul>
           <div style="text-align: center;">
-            <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/shop" class="button">
+            <a href="${process.env.CLIENT_URL || 'https://newpremglasshouse.in'}/shop" class="button">
               Start Shopping
             </a>
           </div>

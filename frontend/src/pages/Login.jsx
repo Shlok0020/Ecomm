@@ -1,4 +1,4 @@
-// frontend/src/pages/Login.jsx
+// frontend/src/pages/Login.jsx - SIRF CSS CHANGED
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -58,7 +58,7 @@ const Login = () => {
         console.log('👑 Admin login - redirecting to admin panel with token');
         // Pass token and user data via URL parameters
         const userParam = encodeURIComponent(JSON.stringify(userData));
-        window.location.href = `http://localhost:5174/dashboard?token=${userData.token}&user=${userParam}`;
+        window.location.href = `https://newpremglasshouse.in/dashboard?token=${userData.token}&user=${userParam}`;
       } else {
         console.log('👤 User login - redirecting to homepage');
         
@@ -159,12 +159,18 @@ const Login = () => {
 
       <style jsx>{`
         .auth-page {
-          min-height: calc(100vh - 200px);
+          min-height: 100vh;  /* 🔴 CHANGED: calc(100vh - 200px) → 100vh */
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2rem;
           background: linear-gradient(135deg, #f8f5f0 0%, #f2ede4 100%);
+        }
+        /* 🔴 ADDED: Hide navbar globally */
+        :global(.navbar), 
+        :global(header), 
+        :global(nav) {
+          display: none !important;
         }
         .auth-container {
           width: 100%;

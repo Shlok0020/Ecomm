@@ -1,4 +1,4 @@
-// admin/src/pages/Categories.jsx - FIXED with real product counts
+// admin/src/pages/Categories.jsx - COMPLETE RESPONSIVE CODE
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSync } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -26,11 +26,8 @@ const Categories = () => {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
       
-      // ✅ Fetch products from API
-      const productsRes = await axios.get('http://localhost:5000/api/products', { headers });
-      console.log('📦 Products API response:', productsRes.data);
+      const productsRes = await axios.get('api.newpremglasshouse.in/api/products', { headers });
       
-      // Extract products array from response
       let productsData = [];
       if (productsRes.data?.success && Array.isArray(productsRes.data.data)) {
         productsData = productsRes.data.data;
@@ -40,73 +37,23 @@ const Categories = () => {
         productsData = productsRes.data.data;
       }
       
-      console.log(`📦 Found ${productsData.length} products total`);
       setProducts(productsData);
 
-      // ✅ Calculate real product counts from database
-      const glassCount = productsData.filter(p => 
-        p.category?.toLowerCase() === 'glass'
-      ).length;
-      
-      const plywoodCount = productsData.filter(p => 
-        p.category?.toLowerCase() === 'plywood'
-      ).length;
-      
-      const hardwareCount = productsData.filter(p => 
-        p.category?.toLowerCase() === 'hardware'
-      ).length;
-      
-      const interiorCount = productsData.filter(p => 
-        p.category?.toLowerCase() === 'interior'
-      ).length;
+      const glassCount = productsData.filter(p => p.category?.toLowerCase() === 'glass').length;
+      const plywoodCount = productsData.filter(p => p.category?.toLowerCase() === 'plywood').length;
+      const hardwareCount = productsData.filter(p => p.category?.toLowerCase() === 'hardware').length;
+      const interiorCount = productsData.filter(p => p.category?.toLowerCase() === 'interior').length;
 
-      const totalProducts = glassCount + plywoodCount + hardwareCount + interiorCount;
-
-      console.log('📊 Real product counts:', {
-        glass: glassCount,
-        plywood: plywoodCount,
-        hardware: hardwareCount,
-        interior: interiorCount,
-        total: totalProducts
-      });
-
-      // ✅ Set categories with REAL product counts
       setCategories([
-        { 
-          id: 'glass', 
-          name: 'Glass', 
-          description: 'Premium glass products including window, mirror, and flute glass',
-          productCount: glassCount,
-          color: '#4f8a8b'
-        },
-        { 
-          id: 'plywood', 
-          name: 'Plywood', 
-          description: 'High quality plywood for furniture and construction',
-          productCount: plywoodCount,
-          color: '#bd7b4d'
-        },
-        { 
-          id: 'hardware', 
-          name: 'Hardware', 
-          description: 'Hardware accessories including handles, hinges, and tools',
-          productCount: hardwareCount,
-          color: '#c9a96e'
-        },
-        { 
-          id: 'interior', 
-          name: 'Interiors', 
-          description: 'Interior design projects and modular solutions',
-          productCount: interiorCount,
-          color: '#6a4e8c'
-        }
+        { id: 'glass', name: 'Glass', description: 'Premium glass products', productCount: glassCount, color: '#4f8a8b' },
+        { id: 'plywood', name: 'Plywood', description: 'High quality plywood', productCount: plywoodCount, color: '#bd7b4d' },
+        { id: 'hardware', name: 'Hardware', description: 'Hardware accessories', productCount: hardwareCount, color: '#c9a96e' },
+        { id: 'interior', name: 'Interiors', description: 'Interior design projects', productCount: interiorCount, color: '#6a4e8c' }
       ]);
 
     } catch (error) {
       console.error('❌ Error fetching data:', error);
       toast.error('Failed to load data');
-      
-      // Set default categories with zero counts
       setCategories([
         { id: 'glass', name: 'Glass', description: 'Premium glass products', productCount: 0, color: '#4f8a8b' },
         { id: 'plywood', name: 'Plywood', description: 'High quality plywood', productCount: 0, color: '#bd7b4d' },
@@ -121,31 +68,18 @@ const Categories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    try {
-      const token = localStorage.getItem('adminToken');
-      const headers = { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      
-      if (editingCategory) {
-        // For now, just update local state since we don't have categories API
-        setCategories(categories.map(c => 
-          c.id === editingCategory.id ? { ...c, ...formData } : c
-        ));
-        toast.success('Category updated (local only)');
-      } else {
-        // For now, just show message since we don't have categories API
-        toast.info('Category creation is not available in demo');
-      }
-      
-      setShowModal(false);
-      setEditingCategory(null);
-      setFormData({ name: '', description: '' });
-    } catch (error) {
-      console.error('❌ Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to save category');
+    if (editingCategory) {
+      setCategories(categories.map(c => 
+        c.id === editingCategory.id ? { ...c, ...formData } : c
+      ));
+      toast.success('Category updated (local only)');
+    } else {
+      toast.info('Category creation is not available in demo');
     }
+    
+    setShowModal(false);
+    setEditingCategory(null);
+    setFormData({ name: '', description: '' });
   };
 
   const handleEdit = (category) => {
@@ -167,29 +101,9 @@ const Categories = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '60vh',
-        flexDirection: 'column',
-        gap: '20px'
-      }}>
-        <div className="spinner" style={{
-          width: '50px',
-          height: '50px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #c9a96e',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <p>Loading categories from database...</p>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading categories...</p>
       </div>
     );
   }
@@ -204,7 +118,7 @@ const Categories = () => {
           <p className="subtitle">Manage your product categories</p>
         </div>
         <div className="header-actions">
-          <button className="btn-refresh" onClick={handleRefresh} title="Refresh from database">
+          <button className="btn-refresh" onClick={handleRefresh}>
             <FaSync /> Refresh
           </button>
           <button className="btn-primary" onClick={() => setShowModal(true)}>
@@ -213,7 +127,6 @@ const Categories = () => {
         </div>
       </div>
 
-      {/* Stats Summary - NOW SHOWING CORRECT TOTALS */}
       <div className="stats-summary">
         <div className="stat-card">
           <span className="stat-label">Total Categories</span>
@@ -231,14 +144,14 @@ const Categories = () => {
 
       <div className="categories-grid">
         {categories.map(category => (
-          <div key={category.id} className="category-card" style={{ borderTop: `4px solid ${category.color || '#c9a96e'}` }}>
+          <div key={category.id} className="category-card" style={{ borderTop: `4px solid ${category.color}` }}>
             <div className="card-header">
               <h3>{category.name}</h3>
               <div className="actions">
-                <button className="btn-edit" onClick={() => handleEdit(category)} title="Edit category">
+                <button className="btn-edit" onClick={() => handleEdit(category)}>
                   <FaEdit />
                 </button>
-                <button className="btn-delete" onClick={() => handleDelete(category.id)} title="Delete category">
+                <button className="btn-delete" onClick={() => handleDelete(category.id)}>
                   <FaTrash />
                 </button>
               </div>
@@ -249,13 +162,12 @@ const Categories = () => {
               <span className="count-label">Products</span>
             </div>
             <div className="category-footer">
-              <small>Category ID: {category.id}</small>
+              <small>ID: {category.id}</small>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -285,7 +197,7 @@ const Categories = () => {
                   Cancel
                 </button>
                 <button type="submit" className="btn-submit">
-                  {editingCategory ? 'Update Category' : 'Add Category'}
+                  {editingCategory ? 'Update' : 'Add'}
                 </button>
               </div>
             </form>
@@ -304,6 +216,29 @@ const Categories = () => {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        .loading-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 60vh;
+          gap: 20px;
+        }
+
+        .spinner {
+          width: 50px;
+          height: 50px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #c9a96e;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .page-header {
           display: flex;
           justify-content: space-between;
@@ -316,7 +251,6 @@ const Categories = () => {
         .page-header h1 {
           font-size: 2rem;
           color: #111;
-          margin-bottom: 0.25rem;
         }
 
         .subtitle {
@@ -498,6 +432,7 @@ const Categories = () => {
           align-items: center;
           justify-content: center;
           z-index: 1000;
+          padding: 1rem;
         }
 
         .modal {
@@ -533,14 +468,6 @@ const Categories = () => {
           border: 1px solid #e0e0e0;
           border-radius: 8px;
           font-size: 0.95rem;
-          transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-          outline: none;
-          border-color: #c9a96e;
-          box-shadow: 0 0 0 2px rgba(201,169,110,0.1);
         }
 
         .modal-actions {
@@ -556,12 +483,6 @@ const Categories = () => {
           border: 1px solid #e0e0e0;
           border-radius: 8px;
           cursor: pointer;
-          font-weight: 500;
-          transition: all 0.3s ease;
-        }
-
-        .btn-cancel:hover {
-          background: #f5f5f5;
         }
 
         .btn-submit {
@@ -571,30 +492,138 @@ const Categories = () => {
           border: none;
           border-radius: 8px;
           cursor: pointer;
-          font-weight: 500;
-          transition: all 0.3s ease;
         }
 
-        .btn-submit:hover {
-          background: #b08e5e;
+        /* ===== RESPONSIVE STYLES ===== */
+        @media (max-width: 1200px) {
+          .stats-summary {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 992px) {
+          .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+          }
+          
+          .header-actions {
+            width: 100%;
+          }
+          
+          .btn-primary, .btn-refresh {
+            flex: 1;
+          }
         }
 
         @media (max-width: 768px) {
-          .page-header {
-            flex-direction: column;
-            align-items: stretch;
+          .categories-page {
+            padding: 10px;
           }
-
+          
+          .page-header h1 {
+            font-size: 1.5rem;
+          }
+          
+          .subtitle {
+            font-size: 0.85rem;
+          }
+          
           .header-actions {
             flex-direction: column;
           }
-
+          
+          .btn-primary, .btn-refresh {
+            width: 100%;
+          }
+          
+          .stats-summary {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          
+          .stat-card {
+            padding: 1rem;
+          }
+          
+          .stat-value {
+            font-size: 1.5rem;
+          }
+          
           .categories-grid {
             grid-template-columns: 1fr;
+            gap: 12px;
           }
-
+          
+          .category-card {
+            padding: 1rem;
+          }
+          
+          .card-header h3 {
+            font-size: 1.1rem;
+          }
+          
+          .description {
+            font-size: 0.9rem;
+            min-height: 40px;
+          }
+          
+          .count-number {
+            font-size: 1.2rem;
+          }
+          
           .modal {
             padding: 1.5rem;
+          }
+          
+          .modal-actions {
+            flex-direction: column;
+          }
+          
+          .btn-cancel, .btn-submit {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .categories-page {
+            padding: 8px;
+          }
+          
+          .page-header h1 {
+            font-size: 1.3rem;
+          }
+          
+          .stat-card {
+            padding: 0.8rem;
+          }
+          
+          .stat-label {
+            font-size: 0.8rem;
+          }
+          
+          .stat-value {
+            font-size: 1.3rem;
+          }
+          
+          .category-card {
+            padding: 0.8rem;
+          }
+          
+          .card-header h3 {
+            font-size: 1rem;
+          }
+          
+          .actions .btn-edit,
+          .actions .btn-delete {
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+          }
+          
+          .count-number {
+            font-size: 1rem;
           }
         }
       `}</style>

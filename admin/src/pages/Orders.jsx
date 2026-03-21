@@ -1,4 +1,4 @@
-// admin/src/pages/Orders/Orders.jsx - COMPLETE FIXED VERSION with address handling
+// admin/src/pages/Orders/Orders.jsx - COMPLETE FIXED VERSION with working status update
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,7 @@ import {
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'api.newpremglasshouse.in/api';
 
 // Helper functions
 const formatCurrency = (amount) => {
@@ -102,6 +102,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [apiError, setApiError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -239,6 +240,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     setApiError(false);
+    setRefreshing(true);
     
     try {
       // Check token before API call
@@ -333,6 +335,7 @@ const Orders = () => {
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -384,40 +387,64 @@ const Orders = () => {
     ];
   };
 
-  // Update order status
+  // ✅ FIXED: Update order status with better error handling
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
       
+      if (!token) {
+        toast.error('Please login again');
+        navigate('/login');
+        return;
+      }
+
+      console.log(`📝 Updating order ${orderId} status to ${newStatus}`);
+
+      // Show loading toast
+      const loadingToast = toast.loading('Updating order status...');
+
       // Try API first
       try {
         const response = await fetch(`${API_URL}/orders/${orderId}`, {
-          method: 'PATCH',
+          method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ status: newStatus })
         });
-        
-        if (!response.ok) {
-          console.log('API update failed, updating locally');
+
+        const data = await response.json();
+        console.log('📥 API Response:', data);
+
+        if (response.ok) {
+          // Success - update local state
+          setOrders(prev => prev.map(order => 
+            order.id === orderId ? { ...order, status: newStatus } : order
+          ));
+          
+          toast.dismiss(loadingToast);
+          toast.success(`Order status updated to ${newStatus}`);
+          
+          // Trigger real-time update
+          window.dispatchEvent(new CustomEvent('orderUpdated', { 
+            detail: { orderId, status: newStatus } 
+          }));
+
+          // Refresh orders to get latest data from backend
+          setTimeout(() => {
+            fetchOrders();
+          }, 500);
+        } else {
+          toast.dismiss(loadingToast);
+          toast.error(data.message || 'Failed to update order status');
         }
       } catch (apiError) {
-        console.log('API update failed, updating locally:', apiError);
+        console.error('API update failed:', apiError);
+        
+        toast.dismiss(loadingToast);
+        toast.error('Failed to update order status. Please try again.');
       }
-      
-      // Update local state
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
-      
-      toast.success(`Order status updated to ${newStatus}`);
-      
-      // Trigger real-time update
-      window.dispatchEvent(new CustomEvent('orderUpdated', { 
-        detail: { orderId, status: newStatus } 
-      }));
       
     } catch (error) {
       console.error('Error updating order:', error);
@@ -434,7 +461,9 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Try API first
+      // Show loading toast
+      const loadingToast = toast.loading('Deleting order...');
+      
       try {
         const response = await fetch(`${API_URL}/orders/${orderId}`, {
           method: 'DELETE',
@@ -442,14 +471,21 @@ const Orders = () => {
             'Authorization': `Bearer ${token}`
           }
         });
+        
+        if (response.ok) {
+          // Update local state
+          setOrders(prev => prev.filter(order => order.id !== orderId));
+          toast.dismiss(loadingToast);
+          toast.success('Order deleted successfully');
+        } else {
+          toast.dismiss(loadingToast);
+          toast.error('Failed to delete order');
+        }
       } catch (apiError) {
-        console.log('API delete failed, deleting locally');
+        console.error('API delete failed:', apiError);
+        toast.dismiss(loadingToast);
+        toast.error('Failed to delete order');
       }
-      
-      // Update local state
-      setOrders(prev => prev.filter(order => order.id !== orderId));
-      
-      toast.success('Order deleted successfully');
       
     } catch (error) {
       console.error('Error deleting order:', error);
@@ -684,8 +720,13 @@ const Orders = () => {
           </p>
         </div>
         <div className="header-actions">
-          <button className="btn-refresh" onClick={fetchOrders}>
-            <FaSync /> Refresh
+          <button 
+            className={`btn-refresh ${refreshing ? 'refreshing' : ''}`} 
+            onClick={fetchOrders}
+            disabled={refreshing}
+          >
+            <FaSync className={refreshing ? 'spin' : ''} /> 
+            {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
           <button className="btn-primary" onClick={handleExport}>
             <FaDownload /> Export CSV
@@ -968,7 +1009,6 @@ const Orders = () => {
 
                   <div className="info-section">
                     <h3><FaMapMarkerAlt /> Shipping Address</h3>
-                    {/* ✅ FIXED: Using formatAddress helper function */}
                     <p>{formatAddress(selectedOrder.userAddress)}</p>
                   </div>
                 </div>
@@ -1089,9 +1129,23 @@ const Orders = () => {
           border: 1px solid #e0e0e0;
         }
 
-        .btn-refresh:hover {
+        .btn-refresh:hover:not(:disabled) {
           background: #f8f9fa;
           transform: translateY(-2px);
+        }
+
+        .btn-refresh:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         .stats-grid {

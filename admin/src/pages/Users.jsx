@@ -21,7 +21,7 @@ import {
 import toast from 'react-hot-toast';
 import userService from '../services/userService';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'api.newpremglasshouse.in/api';
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';

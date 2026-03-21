@@ -2,7 +2,17 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { protect, admin } = require('../middleware/authMiddleware'); // ✅ FIXED IMPORT
+const { protect, admin } = require('../middleware/authMiddleware');
+const {
+  getProfile,
+  getUserById,
+  updateUser,
+  getUserOrders
+} = require('../controllers/userController');
+
+// @desc    Get user profile (logged in user)
+// @route   GET /api/users/profile
+router.get('/profile', protect, getProfile);
 
 // @desc    Get all users (admin only)
 // @route   GET /api/users
@@ -17,48 +27,17 @@ router.get('/', protect, admin, async (req, res) => {
   }
 });
 
+// @desc    Get user orders
+// @route   GET /api/users/:id/orders
+router.get('/:id/orders', protect, getUserOrders);
+
 // @desc    Get single user by ID
 // @route   GET /api/users/:id
-router.get('/:id', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.json({ success: true, data: user });
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+router.get('/:id', protect, getUserById);
 
 // @desc    Update user
 // @route   PUT /api/users/:id
-router.put('/:id', protect, async (req, res) => {
-  try {
-    const { name, phone, address } = req.body;
-    
-    // Check if user is updating their own profile or is admin
-    if (req.user.id !== req.params.id && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Not authorized' });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, phone, address },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json({ success: true, data: user });
-  } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+router.put('/:id', protect, updateUser);
 
 // @desc    Update user status (admin only)
 // @route   PATCH /api/users/:id/status

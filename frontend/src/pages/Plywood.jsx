@@ -1,34 +1,41 @@
-// src/pages/Plywood/Plywood.jsx - WITH PROPER IMAGE HANDLING
+// src/pages/Plywood/Plywood.jsx - ENHANCED WITH VISIBLE HERO & LEFT/RIGHT CARD ANIMATIONS (FILTER COUNT REMOVED) (FREE DELIVERY CARD REMOVED)
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
   FaArrowRight, 
-  FaWhatsapp, 
   FaPhone,
-  FaStore,
   FaStar,
-  FaCheckCircle,
-  FaTree,
-  FaRuler,
-  FaTag,
   FaIndustry,
   FaLeaf,
-  FaGem,
-  FaAward,
-  FaClock,
-  FaUsers,
-  FaRulerCombined,
-  FaRegHeart,
-  FaEye,
   FaShieldAlt,
   FaFire,
   FaWater,
   FaShoppingCart,
   FaHeart,
-  FaImage
+  FaImage,
+  FaFilter,
+  FaTimes,
+  FaBoxOpen,
+  FaTruck,
+  FaCrown,
+  FaStore,
+  FaEye,
+  FaCheckCircle,
+  FaAward,
+  FaClock,
+  FaGem,
+  FaRecycle,
+  FaShieldVirus,
+  FaSearch,
+  FaChevronRight,
+  FaInfoCircle,
+  FaWhatsapp,
+  FaRegHeart
 } from 'react-icons/fa';
+import { HiOutlineSparkles, HiSparkles } from 'react-icons/hi';
+import { GiWoodPile, GiTreeBranch } from 'react-icons/gi';
 import plywoodService from '../services/plywoodService';
 import toast from 'react-hot-toast';
 
@@ -36,76 +43,374 @@ import toast from 'react-hot-toast';
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith('http')) return imagePath;
-  if (imagePath.startsWith('/uploads')) return `http://localhost:5000${imagePath}`;
-  return `http://localhost:5000/uploads/${imagePath}`;
+  if (imagePath.startsWith('/uploads')) return `api.newpremglasshouse.in${imagePath}`;
+  return `api.newpremglasshouse.in/uploads/${imagePath}`;
 };
 
-const handleImageError = (e, fallbackUrl = 'https://via.placeholder.com/300x200?text=No+Image') => {
+const handleImageError = (e) => {
   e.target.onerror = null;
-  e.target.src = fallbackUrl;
+  e.target.src = 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=400';
 };
-// ============================================
+
+// ============= SMOOTH ANIMATION VARIANTS =============
+
+// Page transition
+const pageTransition = {
+  initial: { opacity: 0 },
+  animate: { 
+    opacity: 1,
+    transition: { 
+      duration: 0.8,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.5 }
+  }
+};
+
+// Hero section animations - FIXED VISIBILITY
+const heroContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const heroItemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+      duration: 0.8
+    }
+  }
+};
+
+const heroFeatureVariants = {
+  hidden: { opacity: 0, scale: 0.8, x: -20 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    x: 0,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20,
+      duration: 0.6
+    }
+  },
+  hover: {
+    scale: 1.05,
+    y: -3,
+    transition: { type: "spring", stiffness: 400 }
+  }
+};
+
+// CARD ANIMATIONS - COME FROM LEFT/RIGHT WHEN SCROLLING
+const cardContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: (custom) => ({
+    opacity: 0,
+    x: custom % 2 === 0 ? -150 : 150,
+    y: 50,
+    scale: 0.8,
+    rotate: custom % 2 === 0 ? -5 : 5
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 80,
+      damping: 24,
+      mass: 1.2,
+      duration: 1,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  },
+  hover: {
+    y: -12,
+    scale: 1.03,
+    boxShadow: "0 30px 50px -20px rgba(189,123,77,0.4)",
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 25,
+      duration: 0.4
+    }
+  }
+};
+
+// Benefit card animations - come from sides
+const benefitCardVariants = {
+  hidden: (custom) => ({
+    opacity: 0,
+    x: custom % 2 === 0 ? -100 : 100,
+    y: 30,
+    scale: 0.9
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 22,
+      duration: 0.8
+    }
+  },
+  hover: {
+    y: -8,
+    scale: 1.02,
+    boxShadow: "0 25px 40px -15px rgba(189,123,77,0.25)",
+    transition: { type: "spring", stiffness: 400 }
+  }
+};
+
+// Brand card animations
+const brandCardVariants = {
+  hidden: { 
+    opacity: 0,
+    scale: 0.5,
+    rotate: -10
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20,
+      duration: 0.8
+    }
+  },
+  hover: {
+    scale: 1.1,
+    y: -5,
+    transition: { type: "spring", stiffness: 400 }
+  }
+};
+
+// Section title animations
+const sectionTitleVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+      duration: 0.8
+    }
+  }
+};
+
+// Button animations
+const buttonVariants = {
+  hover: {
+    scale: 1.05,
+    y: -3,
+    boxShadow: "0 10px 25px rgba(189,123,77,0.3)",
+    transition: {
+      type: "spring",
+      stiffness: 500,
+      damping: 30
+    }
+  },
+  tap: {
+    scale: 0.95,
+    y: 0
+  }
+};
+
+// Image zoom animation
+const imageZoomVariants = {
+  hover: {
+    scale: 1.1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      duration: 0.6
+    }
+  }
+};
+
+// Badge entrance animation
+const badgeVariants = {
+  hidden: { 
+    opacity: 0,
+    x: -20,
+    scale: 0.5,
+    rotate: -10
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 20,
+      delay: 0.2
+    }
+  }
+};
+
+// Pulse animation
+const pulseVariants = {
+  pulse: {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
+};
+
+// Float animation
+const floatVariants = {
+  float: {
+    y: [-5, 5, -5],
+    transition: {
+      duration: 3,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
+};
+
+// ============= SCROLL REVEAL COMPONENT =============
+const ScrollReveal = ({ children, variants, custom, className, delay = 0 }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: true, 
+    amount: 0.2,
+    margin: "0px 0px -50px 0px"
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={variants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      custom={custom}
+      className={className}
+      transition={{ delay }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 const Plywood = () => {
   const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedGrade, setSelectedGrade] = useState('all');
-  const [activeProduct, setActiveProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState({
-    products: '1000+',
-    brands: '50+',
-    clients: '2000+',
-    years: '10+'
-  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [filteredCount, setFilteredCount] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
   
   const heroRef = useRef(null);
-  const categoriesRef = useRef(null);
+  const productsRef = useRef(null);
+  const ctaRef = useRef(null);
+  
+  // Parallax effect for hero
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const heroParallax = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
 
-  // Check login status and load cart/wishlist on mount
+  // Smooth scroll progress
+  const { scrollYProgress: pageScroll } = useScroll();
+  const scaleX = useSpring(pageScroll, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Check screen size
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
     
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
     
-    // Load wishlist from localStorage
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      setWishlistItems(JSON.parse(savedWishlist));
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Check login status and load cart/wishlist
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+      
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        setCartItems(JSON.parse(savedCart));
+      }
+      
+      const savedWishlist = localStorage.getItem('wishlist');
+      if (savedWishlist) {
+        setWishlistItems(JSON.parse(savedWishlist));
+      }
+    } catch (error) {
+      console.error('Error loading localStorage:', error);
     }
   }, []);
 
-  // ============= DATA FLOW: Admin → Backend → Database → Frontend =============
-  
   const fetchProducts = async (showToast = false) => {
-    console.log('🔵 Fetching plywood products from database...');
     setLoading(true);
     setError(null);
     
     try {
-      // Clear cache to get fresh data
-      
-      // Check localStorage directly (for debugging)
-      const localData = localStorage.getItem('plywood_admin_products');
-      console.log('📦 LOCALSTORAGE plywood_admin_products:', localData ? JSON.parse(localData) : '[]');
-      
       const response = await plywoodService.getAll();
-      console.log('📦 All products from database:', response.data);
-      
-      // Make sure response.data is an array
       const allProducts = Array.isArray(response.data) ? response.data : [];
       
-      // Process products to ensure images have full URLs
       const processedProducts = allProducts.map(product => ({
         ...product,
         id: product._id || product.id || `product-${Date.now()}-${Math.random()}`,
@@ -113,240 +418,155 @@ const Plywood = () => {
         images: product.images ? product.images.map(img => getImageUrl(img)) : []
       }));
       
-      // 🔥 FIX: Better filtering for plywood products
       const plywoodProducts = processedProducts.filter(p => {
         if (!p) return false;
-        
-        // Agar product already plywood category mein hai
         if (p.category && p.category.toLowerCase() === 'plywood') return true;
-        
-        // Agar grade set hai to plywood hi hoga
-        if (p.grade && ['premium', 'commercial', 'marine', 'bwp', 'mr', 'fire', 'standard'].includes(p.grade.toLowerCase())) return true;
-        
-        // Agar category plywood related hai
-        if (p.category && ['premium', 'commercial', 'marine', 'bwp', 'mr', 'fire', 'standard'].includes(p.category.toLowerCase())) return true;
-        
-        // Name mein ply hai to
+        if (p.grade && ['premium', 'commercial', 'marine', 'bwp', 'mr', 'fire'].includes(p.grade.toLowerCase())) return true;
         if (p.name && p.name.toLowerCase().includes('ply')) return true;
-        
-        // Description mein plywood hai to
         if (p.description && p.description.toLowerCase().includes('plywood')) return true;
-        
-        // Brand mein ply related hai to
-        if (p.brand && (
-          p.brand.toLowerCase().includes('ply') || 
-          p.brand.toLowerCase().includes('green') || 
-          p.brand.toLowerCase().includes('century') ||
-          p.brand.toLowerCase().includes('kitply')
-        )) return true;
-        
         return false;
       });
       
-      console.log('✅ Filtered plywood products:', plywoodProducts);
-      console.log('👑 Admin plywood products:', plywoodProducts.filter(p => p.isAdminAdded).length);
-      
       setProducts(plywoodProducts);
-      
-      // Update stats based on actual data
-      const productCount = plywoodProducts.length;
-      setStats({
-        products: productCount > 0 ? productCount + '+' : '1000+',
-        brands: '50+',
-        clients: productCount > 0 ? (productCount * 2) + '+' : '2000+',
-        years: '10+'
-      });
+      setFilteredCount(plywoodProducts.length);
       
       if (showToast) {
-        toast.success('Products updated from database!');
+        toast.success('Products updated!', {
+          duration: 2000,
+          style: { background: '#c9a96e20', color: '#c9a96e' }
+        });
       }
       
     } catch (error) {
-      console.error('🔴 Error fetching products:', error);
+      console.error('Error fetching products:', error);
       setError(error.message || 'Failed to load products');
       setProducts([]);
+      setFilteredCount(0);
       toast.error('Failed to load products');
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch on mount
   useEffect(() => {
-    console.log('🟣 Plywood component mounted');
     fetchProducts();
     
-    // ============= REAL-TIME UPDATES WHEN ADMIN CHANGES DATA =============
-    
-    // Listen for storage events (when admin makes changes in another tab)
-    const handleStorageChange = (e) => {
-      console.log('🟡 Storage changed in Plywood:', e.key);
-      if (e.key === 'plywood_admin_products' || 
-          e.key === 'plywood_products' || 
-          e.key === null) {
-        fetchProducts(true);
-      }
-    };
-    
-    // Listen for custom events (when admin makes changes in same tab)
-    const handleProductsUpdated = () => {
-      console.log('🟡 Products updated event in Plywood');
-      fetchProducts(true);
-    };
-    
-    const handlePlywoodProductsUpdated = () => {
-      console.log('🟡 Plywood products updated event');
-      fetchProducts(true);
-    };
-    
-    // Mouse move effect
-    let rafId = null;
     const handleMouseMove = (e) => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         setMousePosition({
-          x: (e.clientX / window.innerWidth - 0.5) * 15,
-          y: (e.clientY / window.innerHeight - 0.5) * 15
+          x: (e.clientX / window.innerWidth - 0.5) * 20,
+          y: (e.clientY / window.innerHeight - 0.5) * 20
         });
-        rafId = null;
       });
     };
     
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('productsUpdated', handleProductsUpdated);
-    window.addEventListener('plywoodProductsUpdated', handlePlywoodProductsUpdated);
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('productsUpdated', handleProductsUpdated);
-      window.removeEventListener('plywoodProductsUpdated', handlePlywoodProductsUpdated);
     };
   }, []);
 
-  // 🔥 ADD TO CART HANDLER - FIXED
   const handleAddToCart = (product, e) => {
-    e.stopPropagation(); // Prevent card click
-    e.preventDefault(); // Prevent any default behavior
+    e.stopPropagation();
+    e.preventDefault();
     
-    console.log('Adding to cart:', product); // Debug log
-    
-    // Check if product has price
     if (!product.price) {
       toast.error('Price not available');
       return;
     }
     
-    // Get current cart
-    const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // Create a unique ID for the product (use _id if available, otherwise id)
-    const productId = product._id || product.id;
-    
-    // Check if product already in cart (compare by ID)
-    const existingItem = currentCart.find(item => {
-      const itemId = item._id || item.id;
-      return itemId === productId;
-    });
-    
-    let updatedCart;
-    if (existingItem) {
-      // Increase quantity if already in cart
-      updatedCart = currentCart.map(item => {
+    try {
+      const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+      const productId = product._id || product.id;
+      const existingItem = currentCart.find(item => {
         const itemId = item._id || item.id;
-        if (itemId === productId) {
-          return { 
-            ...item, 
-            quantity: (item.quantity || 1) + 1 
-          };
-        }
-        return item;
+        return itemId === productId;
       });
-      toast.success(`Added another ${product.name} to cart!`);
-    } else {
-      // Add new item with proper ID structure
-      const cartItem = {
-        ...product,
-        id: productId, // Ensure id is set
-        _id: productId, // Ensure _id is set
-        quantity: 1,
-        category: 'plywood'
-      };
-      updatedCart = [...currentCart, cartItem];
-      toast.success(`${product.name} added to cart!`);
+      
+      let updatedCart;
+      if (existingItem) {
+        updatedCart = currentCart.map(item => {
+          const itemId = item._id || item.id;
+          if (itemId === productId) {
+            return { ...item, quantity: (item.quantity || 1) + 1 };
+          }
+          return item;
+        });
+        toast.success(`Added another ${product.name} to cart!`);
+      } else {
+        const cartItem = {
+          ...product,
+          id: productId,
+          _id: productId,
+          quantity: 1,
+          category: 'plywood'
+        };
+        updatedCart = [...currentCart, cartItem];
+        toast.success(`${product.name} added to cart!`);
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      setCartItems(updatedCart);
+      window.dispatchEvent(new Event('cartUpdated'));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart');
     }
-    
-    // Save to localStorage
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    setCartItems(updatedCart);
-    
-    // Dispatch custom event for navbar to update
-    window.dispatchEvent(new Event('cartUpdated'));
-    
-    console.log('Updated cart:', updatedCart); // Debug log
   };
 
-  // 🔥 ADD TO WISHLIST HANDLER
   const handleAddToWishlist = (product, e) => {
-    e.stopPropagation(); // Prevent card click
-    e.preventDefault(); // Prevent any default behavior
+    e.stopPropagation();
+    e.preventDefault();
     
-    // Get current wishlist
-    const currentWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-    
-    // Create a unique ID for the product
-    const productId = product._id || product.id;
-    
-    // Check if already in wishlist
-    const exists = currentWishlist.some(item => {
-      const itemId = item._id || item.id;
-      return itemId === productId;
-    });
-    
-    let updatedWishlist;
-    if (exists) {
-      // Remove from wishlist
-      updatedWishlist = currentWishlist.filter(item => {
+    try {
+      const currentWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const productId = product._id || product.id;
+      const exists = currentWishlist.some(item => {
         const itemId = item._id || item.id;
-        return itemId !== productId;
+        return itemId === productId;
       });
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlistItems(updatedWishlist);
-      toast.success(`${product.name} removed from wishlist!`);
-    } else {
-      // Add to wishlist
-      const wishlistItem = {
-        ...product,
-        id: productId,
-        _id: productId,
-        category: 'plywood'
-      };
-      updatedWishlist = [...currentWishlist, wishlistItem];
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlistItems(updatedWishlist);
-      toast.success(`${product.name} added to wishlist!`);
+      
+      let updatedWishlist;
+      if (exists) {
+        updatedWishlist = currentWishlist.filter(item => {
+          const itemId = item._id || item.id;
+          return itemId !== productId;
+        });
+        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+        setWishlistItems(updatedWishlist);
+        toast.success(`${product.name} removed from wishlist!`);
+      } else {
+        const wishlistItem = {
+          ...product,
+          id: productId,
+          _id: productId,
+          category: 'plywood'
+        };
+        updatedWishlist = [...currentWishlist, wishlistItem];
+        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+        setWishlistItems(updatedWishlist);
+        toast.success(`${product.name} added to wishlist!`);
+      }
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      toast.error('Failed to update wishlist');
     }
   };
 
-  // 🔥 BUY NOW HANDLER
   const handleBuyNow = (product, e) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // Check if product has price
     if (!product.price) {
       toast.error('Price not available');
       return;
     }
     
-    // Check if user is logged in
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
     if (!token || !user) {
-      // Redirect to login page
       toast.error('Please login first');
       navigate('/login', { 
         state: { 
@@ -360,7 +580,6 @@ const Plywood = () => {
       return;
     }
     
-    // If logged in, go to order page
     navigate('/order', { 
       state: { 
         product: {
@@ -371,7 +590,6 @@ const Plywood = () => {
     });
   };
 
-  // Check if product is in wishlist
   const isInWishlist = (productId) => {
     return wishlistItems.some(item => {
       const itemId = item._id || item.id;
@@ -379,7 +597,6 @@ const Plywood = () => {
     });
   };
 
-  // Filter products based on selected grade
   const filteredProducts = selectedGrade === 'all' 
     ? products
     : products.filter(p => {
@@ -388,90 +605,95 @@ const Plywood = () => {
         return grade === selectedGrade.toLowerCase();
       });
 
-  const grades = [
-    { value: 'all', label: 'All Grades', color: '#c9a96e' },
-    { value: 'premium', label: 'Premium Grade', color: '#c45a5a' },
-    { value: 'commercial', label: 'Commercial Grade', color: '#4f8a8b' },
-    { value: 'marine', label: 'Marine Grade', color: '#2c3e50' }
-  ];
+  useEffect(() => {
+    setFilteredCount(filteredProducts.length);
+  }, [filteredProducts]);
 
-  const statsArray = [
-    { value: stats.products, label: 'Products', icon: <FaTree /> },
-    { value: stats.brands, label: 'Brands', icon: <FaIndustry /> },
-    { value: stats.clients, label: 'Clients', icon: <FaUsers /> },
-    { value: stats.years, label: 'Years', icon: <FaAward /> }
+  const grades = [
+    { value: 'all', label: 'All Grades', icon: FaBoxOpen, color: '#c9a96e' },
+    { value: 'premium', label: 'Premium', icon: FaCrown, color: '#c45a5a' },
+    { value: 'commercial', label: 'Commercial', icon: FaStore, color: '#4f8a8b' },
+    { value: 'marine', label: 'Marine', icon: FaWater, color: '#2c3e50' },
+    { value: 'bwp', label: 'BWP', icon: FaShieldAlt, color: '#8e44ad' },
+    { value: 'mr', label: 'MR', icon: FaWater, color: '#16a085' }
   ];
 
   const heroFeatures = [
-    { icon: <FaShieldAlt />, text: 'IS:710 Certified' },
-    { icon: <FaWater />, text: '100% Waterproof' },
-    { icon: <FaFire />, text: 'Fire Retardant' },
-    { icon: <FaLeaf />, text: 'Eco-Friendly' }
+    { icon: FaShieldAlt, text: 'IS:710 Certified', color: '#c9a96e' },
+    { icon: FaWater, text: '100% Waterproof', color: '#3498db' },
+    { icon: FaFire, text: 'Fire Retardant', color: '#e67e22' },
+    { icon: FaLeaf, text: 'Eco-Friendly', color: '#27ae60' }
   ];
 
-  // Animation variants
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 60 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
-  };
+  // BENEFITS ARRAY - FREE DELIVERY CARD REMOVED
+  const benefits = [
+    { icon: FaShieldVirus, title: '5 Year Warranty', desc: 'On all premium products', color: '#27ae60' },
+    { icon: FaRecycle, title: 'Eco-Friendly', desc: 'Sustainable materials', color: '#2ecc71' },
+    { icon: FaAward, title: 'IS:710 Certified', desc: 'Quality assured', color: '#f39c12' },
+    { icon: FaClock, title: 'Quick Delivery', desc: 'Within 24-48 hours', color: '#3498db' },
+    { icon: FaGem, title: 'Premium Quality', desc: 'Best in class', color: '#9b59b6' }
+  ];
 
-  const fadeInScale = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  // UPDATED BRANDS WITH ACTUAL PLYWOOD BRAND NAMES AND LARGER HIGH-QUALITY IMAGES
+  const brands = [
+    { 
+      name: 'Century Ply', 
+      logo: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=600&h=300&fit=crop',
+      desc: 'India\'s leading plywood brand'
+    },
+    { 
+      name: 'Greenply', 
+      logo: 'https://images.unsplash.com/photo-1545987796-200677ee1011?w=600&h=300&fit=crop',
+      desc: 'Eco-friendly premium plywood'
+    },
+    { 
+      name: 'Kitply', 
+      logo: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=600&h=300&fit=crop',
+      desc: 'Trusted since 1982'
+    },
+    { 
+      name: 'Archid', 
+      logo: 'https://images.unsplash.com/photo-1506354666786-959d6d497f1a?w=600&h=300&fit=crop',
+      desc: 'Architectural excellence'
     }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15 }
-    }
-  };
-
-  const pageTransition = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-    transition: { duration: 0.5 }
-  };
+  ];
 
   if (loading && products.length === 0) {
     return (
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         style={{ 
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
           height: '100vh',
-          flexDirection: 'column',
-          gap: '20px',
-          background: '#f8f5f0'
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
+          color: 'white'
         }}
       >
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          style={{
-            width: '60px',
-            height: '60px',
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #bd7b4d',
-            borderRadius: '50%'
-          }}
-        />
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          style={{ fontFamily: 'Jost, sans-serif', color: '#666' }}
-        >
-          Loading plywood products from database...
-        </motion.p>
+        <div style={{ textAlign: 'center' }}>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            style={{
+              width: '60px',
+              height: '60px',
+              border: '3px solid rgba(201,169,110,0.3)',
+              borderTop: '3px solid #c9a96e',
+              borderRadius: '50%',
+              margin: '0 auto 20px'
+            }}
+          />
+          <motion.p
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ color: '#c9a96e' }}
+          >
+            Loading premium plywood collection...
+          </motion.p>
+        </div>
       </motion.div>
     );
   }
@@ -486,1045 +708,1035 @@ const Plywood = () => {
           justifyContent: 'center', 
           alignItems: 'center', 
           height: '100vh',
-          flexDirection: 'column',
-          gap: '20px',
-          background: '#f8f5f0'
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
+          color: 'white',
+          padding: '20px'
         }}
       >
-        <motion.h2 
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          style={{ color: '#ef4444', fontFamily: 'Cormorant Garamond, serif' }}
-        >
-          Error Loading Data
-        </motion.h2>
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          style={{ color: '#666' }}
-        >
-          {error}
-        </motion.p>
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => fetchProducts(true)}
-          style={{
-            padding: '12px 30px',
-            background: '#bd7b4d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '30px',
-            cursor: 'pointer',
-            fontFamily: 'Jost, sans-serif',
-            fontWeight: 500
-          }}
-        >
-          Retry
-        </motion.button>
+        <div style={{ textAlign: 'center' }}>
+          <motion.div
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [0, 10, -10, 0]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <FaBoxOpen style={{ fontSize: '4rem', color: '#ef4444', marginBottom: '20px' }} />
+          </motion.div>
+          <h2 style={{ color: '#ef4444', marginBottom: '10px' }}>Oops! Something went wrong</h2>
+          <p style={{ color: '#999', marginBottom: '20px' }}>{error}</p>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => fetchProducts(true)}
+            style={{
+              padding: '12px 30px',
+              background: '#c9a96e',
+              color: '#1a1a1a',
+              border: 'none',
+              borderRadius: '30px',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            Try Again
+          </motion.button>
+        </div>
       </motion.div>
     );
   }
 
   return (
-    <motion.div 
-      className="plywood-page"
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageTransition}
-    >
-      {/* REMOVED: Last Updated Indicator - Fixed position refresh button */}
-      
-      <Helmet>
-        <title>Premium Plywood Dealers in Jharsuguda | Marine, BWP, Commercial Plywood | New Prem Glass House</title>
-        <meta name="description" content="Shop premium plywood at New Prem Glass House in Jharsuguda. We offer marine plywood, BWP grade, commercial plywood, fire retardant ply, and more from top brands like Century, Greenply, Kitply. 1000+ products available." />
-        <meta name="keywords" content="plywood dealers Jharsuguda, marine plywood Jharsuguda, BWP plywood Jharsuguda, commercial plywood Jharsuguda, Century plywood Jharsuguda, Greenply Jharsuguda, Kitply Jharsuguda, fire retardant plywood, waterproof plywood Odisha" />
-        <link rel="canonical" href="https://newpremglasshouse.com/plywood" />
-      </Helmet>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Jost:wght@200;300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        :root {
-          --gold: #c9a96e;
-          --gold-light: #e8d5b0;
-          --gold-dark: #a07840;
-          --black: #0a0a0a;
-          --dark: #111111;
-          --dark-2: #1a1a1a;
-          --dark-3: #222222;
-          --warm-white: #f8f5f0;
-          --off-white: #ede8df;
-          --cream: #f2ede4;
-          --gray-text: #888888;
-          --light-gray: #d4d4d4;
-          --white: #ffffff;
-          --serif: 'Cormorant Garamond', serif;
-          --display: 'DM Serif Display', serif;
-          --sans: 'Jost', sans-serif;
-          --shadow-sm: 0 10px 30px -15px rgba(0,0,0,0.2);
-          --shadow-md: 0 20px 40px -20px rgba(0,0,0,0.3);
-          --shadow-lg: 0 30px 60px -30px rgba(0,0,0,0.4);
-          --shadow-gold: 0 20px 40px rgba(201, 169, 110, 0.15);
-          
-          /* Plywood specific colors - warm wood tones */
-          --wood-light: #bd7b4d;
-          --wood-dark: #8b5a2b;
-          --wood-grain: #a5673f;
-        }
-
-        body {
-          font-family: var(--sans);
-          background: var(--warm-white);
-          color: var(--dark);
-          overflow-x: hidden;
-        }
-
-        .plywood-page {
-          overflow-x: hidden;
-          background: var(--warm-white);
-          min-height: 100vh;
-        }
-
-        .container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 4rem;
-        }
-
-        @media (max-width: 1200px) {
-          .container { padding: 0 3rem; }
-        }
-        @media (max-width: 768px) {
-          .container { padding: 0 2rem; }
-        }
-
-        .mk-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 1.2rem;
-        }
-
-        .mk-label span {
-          font-family: var(--sans);
-          font-size: 0.7rem;
-          font-weight: 600;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: var(--gold);
-        }
-
-        .mk-label-line {
-          width: 30px;
-          height: 1px;
-          background: var(--gold);
-        }
-
-        .mk-h2 {
-          font-family: var(--serif);
-          font-size: clamp(2.5rem, 5vw, 4.5rem);
-          font-weight: 300;
-          line-height: 1.1;
-          color: var(--dark);
-        }
-
-        .mk-h2 em { font-style: italic; color: var(--gold); }
-
-        /* Hero Section */
-        .plywood-hero {
-          position: relative;
-          min-height: 90vh;
-          display: flex;
-          align-items: center;
-          overflow: hidden;
-          padding: 120px 0 100px;
-          margin-top: -60px;
-          background: var(--black);
-        }
-
-        .plywood-hero__bg {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-        }
-
-        .plywood-hero__bg img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          opacity: 0.55;
-          transform-origin: center;
-          transition: transform 0.1s linear;
-          will-change: transform;
-        }
-
-        .plywood-hero__grain {
-          position: absolute;
-          inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          opacity: 0.6;
-          z-index: 1;
-          pointer-events: none;
-        }
-
-        .plywood-hero__vignette {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            to top,
-            rgba(0,0,0,0.92) 0%,
-            rgba(0,0,0,0.5) 40%,
-            rgba(0,0,0,0.15) 70%,
-            transparent 100%
-          );
-          z-index: 2;
-        }
-
-        .plywood-hero__content {
-          position: relative;
-          z-index: 3;
-          max-width: 1000px;
-          margin: 0 auto;
-          text-align: center;
-          transform: translateY(60px);
-        }
-
-        .plywood-hero__badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
-          padding: 0.8rem 2rem;
-          border-radius: 40px;
-          color: var(--gold);
-          border: 1px solid rgba(255,255,255,0.1);
-          margin-bottom: 2rem;
-          font-size: 0.9rem;
-        }
-
-        .plywood-hero__title {
-          font-family: var(--serif);
-          font-size: clamp(3.5rem, 8vw, 5.5rem);
-          font-weight: 300;
-          color: var(--white);
-          margin-bottom: 1.5rem;
-          line-height: 1;
-        }
-
-        .plywood-hero__title em {
-          font-style: italic;
-          color: var(--gold);
-        }
-
-        .plywood-hero__desc {
-          font-size: 1.2rem;
-          color: rgba(255,255,255,0.8);
-          max-width: 700px;
-          margin: 0 auto 2rem;
-          line-height: 1.8;
-        }
-
-        .hero-stats {
-          display: flex;
-          justify-content: center;
-          gap: 3rem;
-          margin: 2rem 0;
-          flex-wrap: wrap;
-        }
-
-        .hero-stat {
-          text-align: center;
-          min-width: 120px;
-        }
-
-        .hero-stat h4 {
-          font-family: var(--serif);
-          font-size: 2.5rem;
-          color: var(--gold);
-          margin-bottom: 0.3rem;
-        }
-
-        .hero-stat p {
-          font-size: 0.9rem;
-          color: rgba(255,255,255,0.7);
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .hero-features {
-          display: flex;
-          justify-content: center;
-          gap: 2rem;
-          margin: 3rem 0 2rem;
-          flex-wrap: wrap;
-        }
-
-        .hero-feature {
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          padding: 0.8rem 1.5rem;
-          background: rgba(255,255,255,0.05);
-          backdrop-filter: blur(10px);
-          border-radius: 50px;
-          border: 1px solid rgba(255,255,255,0.1);
-          color: var(--white);
-        }
-
-        .hero-feature svg {
-          color: var(--gold);
-          font-size: 1.2rem;
-        }
-
-        .hero-feature span {
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .hero-buttons {
-          display: flex;
-          gap: 1.5rem;
-          justify-content: center;
-          margin-top: 2rem;
-        }
-
-        .hero-btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.8rem;
-          padding: 1rem 2.5rem;
-          background: var(--gold);
-          color: var(--dark);
-          border-radius: 40px;
-          text-decoration: none;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          border: none;
-          cursor: pointer;
-        }
-
-        .hero-btn-primary:hover {
-          background: var(--white);
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-gold);
-        }
-
-        .hero-btn-outline {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.8rem;
-          padding: 1rem 2.5rem;
-          background: transparent;
-          color: var(--white);
-          border: 2px solid var(--gold);
-          border-radius: 40px;
-          text-decoration: none;
-          font-weight: 600;
-          transition: all 0.3s ease;
-        }
-
-        .hero-btn-outline svg {
-          transform: rotate(90deg) !important;
-          font-size: 1.2rem;
-          transition: transform 0.3s ease;
-        }
-
-        .hero-btn-outline:hover {
-          background: var(--gold);
-          color: var(--dark);
-          transform: translateY(-3px);
-        }
-
-        .hero-btn-outline:hover svg {
-          transform: rotate(90deg) scale(1.1) !important;
-        }
-
-        .stats-section {
-          padding: 80px 0;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 30px;
-        }
-
-        .stat-card {
-          background: var(--white);
-          padding: 40px 30px;
-          border-radius: 24px;
-          text-align: center;
-          box-shadow: var(--shadow-sm);
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          border: 1px solid rgba(0,0,0,0.02);
-        }
-
-        .stat-card:hover {
-          transform: translateY(-10px);
-          box-shadow: var(--shadow-gold);
-          border-color: var(--gold);
-        }
-
-        .stat-card svg {
-          font-size: 3rem;
-          color: var(--gold);
-          margin-bottom: 1.5rem;
-        }
-
-        .stat-card h3 {
-          font-family: var(--serif);
-          font-size: 2.8rem;
-          color: var(--dark);
-          margin-bottom: 0.5rem;
-          font-weight: 600;
-        }
-
-        .stat-card p {
-          color: var(--gray-text);
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .filters-section {
-          padding: 40px 0;
-        }
-
-        .filter-wrapper {
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-
-        .filter-btn {
-          padding: 0.8rem 2rem;
-          border: none;
-          border-radius: 40px;
-          background: var(--white);
-          color: var(--dark);
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: var(--shadow-sm);
-          font-size: 1rem;
-          font-family: var(--sans);
-          border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .filter-btn:hover {
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-gold);
-          color: var(--gold);
-        }
-
-        .filter-btn.active {
-          background: var(--gold);
-          color: var(--white);
-          border-color: var(--gold);
-        }
-
-        .products-section {
-          padding: 60px 0 100px;
-        }
-
-        /* 🔥 NEW PRODUCT CARD STYLES - Same as Glass */
-        .products-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 25px;
-          margin-top: 3rem;
-        }
-
-        .product-card {
-          background: white;
-          border-radius: 16px;
-          overflow: hidden;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-          transition: all 0.3s ease;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .product-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 15px 30px rgba(189,123,77,0.15);
-        }
-
-        .product-image-container {
-          position: relative;
-          height: 200px;
-          overflow: hidden;
-          background: #f5f5f5;
-        }
-
-        .product-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s ease;
-        }
-
-        .product-card:hover .product-image {
-          transform: scale(1.08);
-        }
-
-        .product-image-placeholder {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
-          color: #999;
-          gap: 8px;
-        }
-
-        .product-image-placeholder svg {
-          font-size: 3rem;
-          opacity: 0.4;
-        }
-
-        .product-image-placeholder span {
-          font-size: 0.8rem;
-        }
-
-        .product-wishlist {
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          width: 36px;
-          height: 36px;
-          background: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #666;
-          font-size: 1.1rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          z-index: 2;
-          border: none;
-        }
-
-        .product-wishlist:hover {
-          background: #ff4d4d;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .product-wishlist.active {
-          background: #ff4d4d;
-          color: white;
-        }
-
-        .product-content {
-          padding: 18px 16px;
-        }
-
-        .product-title {
-          font-family: var(--sans);
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--dark);
-          margin-bottom: 6px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .product-description {
-          font-size: 0.85rem;
-          color: var(--gray-text);
-          margin-bottom: 12px;
-          line-height: 1.4;
-          height: 38px;
-          overflow: hidden;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-
-        .product-rating {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          margin-bottom: 12px;
-        }
-
-        .product-rating-stars {
-          display: flex;
-          gap: 2px;
-          color: #ffb800;
-          font-size: 0.8rem;
-        }
-
-        .product-rating-number {
-          font-size: 0.8rem;
-          color: var(--gray-text);
-          margin-left: 4px;
-        }
-
-        .product-reviews {
-          font-size: 0.75rem;
-          color: #999;
-        }
-
-        .product-price-section {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 15px;
-        }
-
-        .product-price {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .product-current-price {
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: var(--dark);
-          line-height: 1.2;
-        }
-
-        .product-current-price small {
-          font-size: 0.8rem;
-          font-weight: 400;
-          color: var(--gray-text);
-        }
-
-        .product-mrp {
-          font-size: 0.8rem;
-          color: #999;
-          text-decoration: line-through;
-        }
-
-        .product-stock {
-          font-size: 0.75rem;
-          color: #28a745;
-          font-weight: 500;
-        }
-
-        .product-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .product-add-to-cart {
-          flex: 1;
-          background: var(--gold);
-          color: white;
-          border: none;
-          border-radius: 30px;
-          padding: 10px 12px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .product-add-to-cart:hover {
-          background: var(--gold-dark);
-          transform: translateY(-2px);
-        }
-
-        .product-add-to-cart:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .product-buy-now {
-          background: #28a745;
-          color: white;
-          border: none;
-          border-radius: 30px;
-          padding: 10px 16px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .product-buy-now:hover {
-          background: #218838;
-          transform: translateY(-2px);
-        }
-
-        .product-buy-now:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .product-badge {
-          position: absolute;
-          top: 12px;
-          left: 12px;
-          background: var(--gold);
-          color: white;
-          font-size: 0.7rem;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-weight: 500;
-          z-index: 2;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .product-new-badge {
-          position: absolute;
-          top: 12px;
-          left: 12px;
-          background: #4caf50;
-          color: white;
-          font-size: 0.7rem;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-weight: 500;
-          z-index: 2;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .cta-section {
-          padding: 80px 0;
-        }
-
-        .cta-box {
-          background: linear-gradient(135deg, var(--wood-light), var(--wood-dark));
-          border-radius: 40px;
-          padding: 80px;
-          text-align: center;
-          color: var(--white);
-          position: relative;
-          overflow: hidden;
-          box-shadow: var(--shadow-lg);
-        }
-
-        .cta-box::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-          animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .cta-content {
-          position: relative;
-          z-index: 2;
-        }
-
-        .cta-box h2 {
-          font-family: var(--serif);
-          font-size: 3.5rem;
-          margin-bottom: 1rem;
-          color: var(--white);
-          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .cta-box p {
-          font-size: 1.2rem;
-          margin-bottom: 2.5rem;
-          opacity: 1;
-          color: var(--white);
-          max-width: 700px;
-          margin-left: auto;
-          margin-right: auto;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .cta-buttons {
-          display: flex;
-          gap: 1.5rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .btn-cta {
-          background: var(--dark);
-          color: var(--white);
-          padding: 1rem 2.5rem;
-          border-radius: 40px;
-          text-decoration: none;
-          font-weight: 600;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.8rem;
-          transition: all 0.3s ease;
-          border: none;
-          font-size: 1rem;
-        }
-
-        .btn-cta:hover {
-          background: var(--white);
-          color: var(--dark);
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-gold);
-        }
-
-        .btn-cta-outline {
-          background: transparent;
-          color: var(--white);
-          padding: 1rem 2.5rem;
-          border-radius: 40px;
-          text-decoration: none;
-          font-weight: 600;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.8rem;
-          transition: all 0.3s ease;
-          border: 2px solid var(--white);
-          font-size: 1rem;
-        }
-
-        .btn-cta-outline svg {
-          transform: rotate(90deg) !important;
-          font-size: 1.2rem;
-          transition: transform 0.3s ease;
-        }
-
-        .btn-cta-outline:hover {
-          background: var(--white);
-          color: var(--wood-dark);
-          transform: translateY(-3px);
-        }
-
-        .btn-cta-outline:hover svg {
-          transform: rotate(90deg) scale(1.1) !important;
-        }
-
-        @media (max-width: 1200px) {
-          .products-grid { grid-template-columns: repeat(3, 1fr); }
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 1024px) {
-          .products-grid { grid-template-columns: repeat(2, 1fr); }
-          .hero-features { gap: 1rem; }
-        }
-
-        @media (max-width: 768px) {
-          .plywood-hero { 
-            min-height: 80vh; 
-            padding: 100px 0 60px;
-            margin-top: -80px;
+    <>
+      {/* Progress Bar */}
+      <motion.div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: 'linear-gradient(90deg, #c9a96e, #bd7b4d, #8b5a2b)',
+          transformOrigin: '0%',
+          scaleX,
+          zIndex: 1000
+        }}
+      />
+
+      <motion.div 
+        className="plywood-page"
+        variants={pageTransition}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <Helmet>
+          <title>Premium Plywood Dealers in Jharsuguda | New Prem Glass House</title>
+          <meta name="description" content="Shop premium plywood at New Prem Glass House in Jharsuguda. Marine plywood, BWP grade, commercial plywood from top brands." />
+        </Helmet>
+
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap');
+
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
           }
-          
-          .plywood-hero__title { font-size: 3rem; }
-          
-          .plywood-hero__content {
-            transform: translateY(80px);
+
+          :root {
+            --gold: #c9a96e;
+            --gold-light: #e8d5b0;
+            --gold-dark: #a07840;
+            --wood-light: #bd7b4d;
+            --wood-dark: #8b5a2b;
+            --dark: #1a1a1a;
+            --white: #ffffff;
+            --gray: #666;
+            --light-gray: #f5f5f5;
+            --serif: 'Cormorant Garamond', serif;
+            --sans: 'Jost', sans-serif;
           }
-          
-          .hero-stats { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin: 2rem 0;
+
+          body {
+            font-family: var(--sans);
+            background: var(--white);
+            color: var(--dark);
+            overflow-x: hidden;
           }
-          
-          .hero-stat {
-            min-width: auto;
+
+          .plywood-page {
+            overflow-x: hidden;
           }
-          
-          .hero-stat h4 {
-            font-size: 2rem;
+
+          .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
           }
-          
-          .hero-features { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+
+          @media (max-width: 768px) {
+            .container {
+              padding: 0 15px;
+            }
           }
-          
-          .hero-feature {
-            padding: 0.6rem 1rem;
-          }
-          
-          .hero-feature span {
-            font-size: 0.8rem;
-          }
-          
-          .hero-buttons { 
-            flex-direction: column; 
-            align-items: center; 
-          }
-          
-          .hero-btn-primary, .hero-btn-outline {
-            width: 100%;
+
+          /* Hero Section - FIXED VISIBILITY */
+          .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
           }
-          
-          .products-grid { grid-template-columns: repeat(2, 1fr); }
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
-          .filter-wrapper { gap: 0.8rem; }
-          .filter-btn { padding: 0.6rem 1.5rem; font-size: 0.9rem; }
-          .cta-buttons { flex-direction: column; }
-          .cta-box { padding: 40px 20px; }
-          .cta-box h2 { font-size: 2.2rem; }
-        }
 
-        @media (max-width: 480px) {
-          .plywood-hero {
-            margin-top: -70px;
+          .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
           }
-          
-          .plywood-hero__title { font-size: 2.5rem; }
-          
-          .plywood-hero__content {
-            transform: translateY(60px);
+
+          .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
           }
-          
-          .hero-stat h4 {
-            font-size: 1.8rem;
+
+          .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 2;
           }
-          
-          .hero-stat p {
+
+          .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 0 20px;
+          }
+
+          .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(201,169,110,0.15);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(201,169,110,0.3);
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+          }
+
+          .hero-title {
+            font-family: var(--serif);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            color:white;
+          }
+
+          .hero-title em {
+            color: var(--gold);
+            font-style: italic;
+            display: inline-block;
+          }
+
+          .hero-description {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: rgba(255,255,255,0.9);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+          }
+
+          .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+          }
+
+          .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.9rem;
+          }
+
+          .hero-feature svg {
+            color: var(--gold);
+            font-size: 1rem;
+          }
+
+          .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+
+          .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 35px;
+            background: var(--gold);
+            color: var(--dark);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+          }
+
+          .btn-primary:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(201,169,110,0.3);
+          }
+
+          .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 35px;
+            background: transparent;
+            color: white;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+          }
+
+          .btn-outline:hover {
+            background: var(--gold);
+            color: var(--dark);
+            transform: translateY(-3px);
+          }
+
+          /* Filters Section */
+          .filters-section {
+            padding: 30px 0;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+          }
+
+          .filter-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+
+          .filter-toggle {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+          }
+
+          @media (max-width: 768px) {
+            .filter-toggle {
+              display: flex;
+            }
+          }
+
+          .filter-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+          }
+
+          @media (max-width: 768px) {
+            .filter-wrapper {
+              display: ${showFilters ? 'flex' : 'none'};
+              flex-direction: column;
+              align-items: stretch;
+              margin-top: 20px;
+            }
+          }
+
+          .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 25px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 40px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+          }
+
+          .filter-btn:hover {
+            background: var(--gold);
+            color: white;
+            transform: translateY(-2px);
+          }
+
+          .filter-btn.active {
+            background: var(--gold);
+            color: white;
+          }
+
+          /* Products Section */
+          .products-section {
+            padding: 60px 0;
+          }
+
+          .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+          }
+
+          .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+          }
+
+          .section-label span {
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+          }
+
+          .section-label-line {
+            width: 40px;
+            height: 1px;
+            background: var(--gold);
+          }
+
+          .section-title {
+            font-family: var(--serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--dark);
+          }
+
+          .section-title em {
+            color: var(--gold);
+            font-style: italic;
+          }
+
+          .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+          }
+
+          @media (max-width: 1200px) {
+            .products-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+
+          @media (max-width: 992px) {
+            .products-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (max-width: 576px) {
+            .products-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          /* Product Card */
+          .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+          }
+
+          .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(189,123,77,0.2);
+          }
+
+          .product-image-container {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+            background: #f5f5f5;
+          }
+
+          @media (max-width: 768px) {
+            .product-image-container {
+              height: 200px;
+            }
+          }
+
+          .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+          }
+
+          .product-card:hover .product-image {
+            transform: scale(1.1);
+          }
+
+          .product-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            color: #999;
+          }
+
+          .product-wishlist {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            transition: all 0.3s ease;
+          }
+
+          .product-wishlist:hover {
+            transform: scale(1.1);
+          }
+
+          .product-wishlist.active {
+            background: #ff4d4d;
+            color: white;
+          }
+
+          .product-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--gold);
+            color: white;
+            font-size: 0.75rem;
+            padding: 5px 15px;
+            border-radius: 25px;
+            font-weight: 500;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          }
+
+          .product-content {
+            padding: 20px;
+          }
+
+          .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .product-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 40px;
+          }
+
+          .product-brand {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--wood-dark);
+            margin-bottom: 8px;
+          }
+
+          .product-thickness {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 10px;
+          }
+
+          .thickness-tag {
+            background: #f5f5f5;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            color: #666;
+          }
+
+          .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+          }
+
+          .rating-stars {
+            display: flex;
+            gap: 2px;
+            color: #ffb800;
             font-size: 0.8rem;
           }
-          
-          .hero-features { 
-            grid-template-columns: 1fr; 
-          }
-          
-          .products-grid { grid-template-columns: 1fr; }
-          .stats-grid { grid-template-columns: 1fr; }
-          .product-image-container { height: 180px; }
-        }
-        
-        @media (max-width: 360px) {
-          .plywood-hero {
-            margin-top: -60px;
-          }
-          
-          .plywood-hero__content {
-            transform: translateY(40px);
-          }
-        }
-      `}</style>
 
-      {/* Hero Section */}
-      <section className="plywood-hero" ref={heroRef}>
-        <div className="plywood-hero__bg">
-          <img
-            src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&q=80&w=1600"
-            alt="Premium Plywood"
-            style={{
-              transform: `scale(1.05) translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`
-            }}
-          />
-        </div>
-        <div className="plywood-hero__grain" />
-        <div className="plywood-hero__vignette" />
+          .product-price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          }
 
-        <div className="container">
-          <div className="plywood-hero__content">
-            <motion.div
-              variants={fadeInUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.2 }}
-            >
-              <div className="plywood-hero__badge">
-                <FaLeaf /> Premium Plywood Store
-              </div>
+          .current-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+          }
+
+          .current-price small {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #999;
+          }
+
+          .product-mrp {
+            font-size: 0.8rem;
+            color: #999;
+            text-decoration: line-through;
+          }
+
+          .product-stock {
+            font-size: 0.75rem;
+            font-weight: 500;
+          }
+
+          .product-actions {
+            display: flex;
+            gap: 8px;
+          }
+
+          @media (max-width: 576px) {
+            .product-actions {
+              flex-direction: column;
+            }
+          }
+
+          .btn-add-cart {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 12px;
+            background: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .btn-add-cart:hover:not(:disabled) {
+            background: var(--gold-dark);
+            transform: translateY(-2px);
+          }
+
+          .btn-buy-now {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .btn-buy-now:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+          }
+
+          /* Benefits Section */
+          .benefits-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          }
+
+          .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+          }
+
+          @media (max-width: 992px) {
+            .benefits-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (max-width: 576px) {
+            .benefits-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          .benefit-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+          }
+
+          .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+          }
+
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          .benefit-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #f8f5f0, #f2ede4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--gold);
+            position: relative;
+            z-index: 2;
+          }
+
+          .benefit-title {
+            font-family: var(--serif);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+            position: relative;
+            z-index: 2;
+          }
+
+          .benefit-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+          }
+
+          /* Brands Section - UPDATED WITH DARKER TEXT */
+          .brands-section {
+            padding: 60px 0;
+            background: #fafaf8;
+          }
+
+          .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 35px;
+            margin-top: 50px;
+          }
+
+          @media (max-width: 992px) {
+            .brands-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 30px;
+            }
+          }
+
+          @media (max-width: 576px) {
+            .brands-grid {
+              grid-template-columns: 1fr;
+              gap: 25px;
+            }
+          }
+
+          .brand-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(201,169,110,0.1);
+          }
+
+          .brand-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(201,169,110,0.2);
+            border-color: rgba(201,169,110,0.3);
+          }
+
+          .brand-card img {
+            max-width: 100%;
+            height: 120px;
+            width: auto;
+            object-fit: contain;
+            filter: grayscale(100%);
+            transition: all 0.4s ease;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .brand-card:hover img {
+            filter: grayscale(0%);
+            transform: scale(1.05);
+          }
+
+          .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-top: 15px;
+            font-family: var(--sans);
+            letter-spacing: -0.3px;
+          }
+
+          .brand-desc {
+            font-size: 0.9rem;
+            color: #000000;
+            margin-top: 10px;
+            line-height: 1.5;
+            font-weight: 500;
+            opacity: 0.9;
+          }
+
+          /* CTA Section */
+          .cta-section {
+            padding: 80px 0;
+          }
+
+          .cta-box {
+            background: linear-gradient(135deg, var(--wood-light), var(--wood-dark));
+            border-radius: 50px;
+            padding: 80px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+          }
+
+          .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+          }
+
+          .cta-box h2 {
+            font-family: var(--serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+          }
+
+          @media (max-width: 768px) {
+            .hero-title {
+              font-size: clamp(3.5rem, 12vw, 5rem);
+            }
+          }
+
+          @media (max-width: 480px) {
+            .hero-title {
+              font-size: clamp(4rem, 10vw, 4rem);
+            }
+          }
+
+          .cta-box p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+          }
+
+          .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+          }
+
+          .btn-cta {
+            padding: 14px 35px;
+            background: var(--dark);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+          }
+
+          .btn-cta:hover {
+            background: white;
+            color: var(--dark);
+            transform: translateY(-3px);
+          }
+
+          .btn-cta-outline {
+            padding: 14px 35px;
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+          }
+
+          .btn-cta-outline:hover {
+            background: white;
+            color: var(--wood-dark);
+            transform: translateY(-3px);
+          }
+
+          /* Quick View Modal */
+          .quick-view-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+          }
+
+          .quick-view-content {
+            background: white;
+            border-radius: 40px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+          }
+
+          .close-quick-view {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #666;
+            transition: all 0.3s ease;
+          }
+
+          .close-quick-view:hover {
+            background: #ef4444;
+            color: white;
+            transform: rotate(90deg);
+          }
+        `}</style>
+
+        {/* Hero Section - FIXED VISIBILITY */}
+        <section className="hero-section" ref={heroRef}>
+          <div className="hero-bg">
+            <motion.img
+              src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&q=80&w=1600"
+              alt="Premium Plywood"
+              style={{
+                y: heroParallax,
+                scale: 1.1,
+              }}
+            />
+          </div>
+          <div className="hero-overlay" />
+
+          <motion.div 
+            className="hero-content"
+            variants={heroContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={heroItemVariants} className="hero-badge">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <GiWoodPile />
+              </motion.div>
+              <span>Premium Plywood Store</span>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <HiOutlineSparkles />
+              </motion.div>
             </motion.div>
-            
-            <motion.h1
-              className="plywood-hero__title"
-              variants={fadeInUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.3 }}
-            >
+
+            <motion.h1 variants={heroItemVariants} className="hero-title">
               Premium <em>Plywood</em>
             </motion.h1>
-            
-            <motion.p
-              className="plywood-hero__desc"
-              variants={fadeInUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.4 }}
-            >
-              India's most trusted plywood brand with 50+ years of excellence. 
-              We offer a wide range of premium plywood products for every application.
+
+            <motion.p variants={heroItemVariants} className="hero-description">
+              Discover our extensive collection of high-quality plywood, from commercial to premium marine grades. 
+              Perfect for all your construction and furniture needs.
             </motion.p>
 
             <motion.div 
-              className="hero-stats"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              {statsArray.map((stat, index) => (
-                <motion.div 
-                  key={index} 
-                  className="hero-stat"
-                  variants={fadeInUp}
-                  whileHover={{ scale: 1.1, y: -5 }}
-                >
-                  <motion.h4
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.6 + index * 0.1, type: "spring" }}
-                  >
-                    {stat.value}
-                  </motion.h4>
-                  <p>{stat.label}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <motion.div 
               className="hero-features"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
+              variants={heroContainerVariants}
             >
               {heroFeatures.map((feature, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   className="hero-feature"
-                  variants={fadeInUp}
-                  whileHover={{ scale: 1.05 }}
+                  variants={heroFeatureVariants}
+                  whileHover="hover"
                 >
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    {feature.icon}
-                  </motion.div>
+                  <feature.icon style={{ color: feature.color }} />
                   <span>{feature.text}</span>
                 </motion.div>
               ))}
@@ -1532,350 +1744,606 @@ const Plywood = () => {
 
             <motion.div 
               className="hero-buttons"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
+              variants={heroContainerVariants}
             >
               <motion.div
-                variants={fadeInUp}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
               >
-                <Link to="/contact" className="hero-btn-primary">
+                <Link to="/contact" className="btn-primary">
                   <span>Get Free Quote</span>
-                  <FaArrowRight />
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <FaArrowRight />
+                  </motion.div>
                 </Link>
               </motion.div>
               <motion.div
-                variants={fadeInUp}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
               >
-                <a href="tel:+917328019093" className="hero-btn-outline">
+                <a href="tel:+917328019093" className="btn-outline">
                   <span>Call Now</span>
-                  <FaPhone />
+                  <motion.div
+                    animate={{ rotate: [90, 95, 90] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <FaPhone />
+                  </motion.div>
                 </a>
               </motion.div>
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="stats-section">
-        <div className="container">
-          <motion.div 
-            className="stats-grid"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {statsArray.map((stat, i) => (
-              <motion.div 
-                key={i}
-                className="stat-card"
-                variants={fadeInScale}
-                whileHover={{ y: -10 }}
-              >
-                {stat.icon}
-                <h3>{stat.value}</h3>
-                <p>{stat.label}</p>
-              </motion.div>
-            ))}
           </motion.div>
-        </div>
-      </section>
+        </section>
 
-      {/* Filters Section */}
-      <section className="filters-section">
-        <div className="container">
-          <motion.div 
-            className="filter-wrapper"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            {grades.map(grade => (
-              <motion.button
-                key={grade.value}
-                className={`filter-btn ${selectedGrade === grade.value ? 'active' : ''}`}
-                onClick={() => setSelectedGrade(grade.value)}
-                whileHover={{ y: -3 }}
+        {/* Filters Section - "4 Products" REMOVED */}
+        <section className="filters-section">
+          <div className="container">
+            <div className="filter-header">
+              <motion.button 
+                className="filter-toggle"
+                onClick={() => setShowFilters(!showFilters)}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {grade.label}
+                <FaFilter />
+                <span>Filter</span>
+                {showFilters ? <FaTimes /> : <FaChevronRight />}
               </motion.button>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Products Section */}
-      <section className="products-section">
-        <div className="container">
-          <motion.div 
-            className="section-header"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            style={{ textAlign: 'center', marginBottom: '3rem' }}
-          >
-            <div className="mk-label" style={{ justifyContent: 'center' }}>
-              <div className="mk-label-line"></div>
-              <span>OUR COLLECTION</span>
-              <div className="mk-label-line"></div>
             </div>
-            <h2 className="mk-h2">
-              Premium <em>Plywood Range</em>
-            </h2>
-            <p style={{ color: 'var(--gray-text)', marginTop: '1rem' }}>
-              High-quality plywood for every need, from commercial to premium grades
-            </p>
-            
-            {/* REMOVED: Product count section */}
-            
-          </motion.div>
 
-          {!products || products.length === 0 ? (
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{ textAlign: 'center', padding: '50px', color: 'var(--gray-text)' }}
+              className="filter-wrapper"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              No plywood products found. Add some from admin panel!
-            </motion.div>
-          ) : (
-            <motion.div 
-              className="products-grid"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {filteredProducts.map((product, index) => (
-                product && (
-                  <motion.div
-                    key={product._id || product.id || `product-${index}`}
-                    className="product-card"
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: { 
-                        opacity: 1, 
-                        y: 0,
-                        transition: { 
-                          duration: 0.5,
-                          delay: index * 0.1
-                        }
-                      }
-                    }}
-                    whileHover={{ 
-                      y: -8,
-                      boxShadow: '0 15px 30px rgba(189,123,77,0.15)',
-                      transition: { duration: 0.3 }
-                    }}
-                    onClick={() => setActiveProduct(product._id || product.id)}
-                  >
-                    {/* Product Image with proper URL handling */}
-                    <div className="product-image-container">
-                      {product.image ? (
-                        <img 
-                          src={getImageUrl(product.image)} 
-                          alt={product.name || 'Plywood Product'}
-                          className="product-image"
-                          onError={(e) => handleImageError(e)}
-                        />
-                      ) : (
-                        <div className="product-image-placeholder">
-                          <FaImage />
-                          <span>No Image</span>
-                        </div>
-                      )}
-                      
-                      {/* Wishlist Button */}
-                      <motion.button
-                        className={`product-wishlist ${isInWishlist(product._id || product.id) ? 'active' : ''}`}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleAddToWishlist(product, e);
-                        }}
-                      >
-                        <FaHeart />
-                      </motion.button>
-                      
-                      {/* Grade Badge */}
-                      <div className="product-badge">
-                        {product.grade === 'premium' ? 'Premium' : 
-                         product.grade === 'commercial' ? 'Commercial' : 
-                         product.grade === 'marine' ? 'Marine' : 
-                         product.grade === 'bwp' ? 'BWP' :
-                         product.grade === 'mr' ? 'MR' :
-                         product.grade || product.category || 'Premium'}
-                      </div>
-                      
-                      {/* New Badge */}
-                      {product.isAdminAdded && (
-                        <div className="product-new-badge">
-                          New
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Product Info */}
-                    <div className="product-content">
-                      <h3 className="product-title">{product.name || 'Plywood Product'}</h3>
-                      {product.description && (
-                        <p className="product-description">{product.description}</p>
-                      )}
-                      
-                      {/* Brand */}
-                      {product.brand && (
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '4px', 
-                          marginBottom: '8px',
-                          fontSize: '0.8rem',
-                          color: 'var(--wood-dark)'
-                        }}>
-                          <FaIndustry /> {product.brand}
-                        </div>
-                      )}
-                      
-                      {/* Thickness */}
-                      {product.thickness && (
-                        <div style={{ 
-                          display: 'flex', 
-                          flexWrap: 'wrap', 
-                          gap: '4px', 
-                          marginBottom: '10px' 
-                        }}>
-                          {Array.isArray(product.thickness) 
-                            ? product.thickness.map(t => (
-                                <span key={t} style={{
-                                  background: 'var(--cream)',
-                                  padding: '2px 8px',
-                                  borderRadius: '12px',
-                                  fontSize: '0.65rem',
-                                  color: 'var(--gray-text)'
-                                }}>{t}</span>
-                              ))
-                            : <span style={{
-                                background: 'var(--cream)',
-                                padding: '2px 8px',
-                                borderRadius: '12px',
-                                fontSize: '0.65rem',
-                                color: 'var(--gray-text)'
-                              }}>{product.thickness}</span>
-                          }
-                        </div>
-                      )}
-                      
-                      {/* Rating - Only show if admin provided */}
-                      {product.rating && (
-                        <div className="product-rating">
-                          <div className="product-rating-stars">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} color={i < Math.floor(product.rating) ? '#ffb800' : '#e0e0e0'} />
-                            ))}
-                          </div>
-                          <span className="product-rating-number">{product.rating}</span>
-                          {product.reviews && (
-                            <span className="product-reviews">({product.reviews} reviews)</span>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Price Section - Only show if admin provided price */}
-                      {product.price && (
-                        <div className="product-price-section">
-                          <div className="product-price">
-                            <span className="product-current-price">
-                              ₹{product.price}
-                            </span>
-                            {product.mrp && product.mrp > product.price && (
-                              <span className="product-mrp">₹{product.mrp}</span>
-                            )}
-                          </div>
-                          {product.stock && (
-                            <span className="product-stock">{product.stock} in stock</span>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Action Buttons - Only enable if price exists */}
-                      <div className="product-actions">
-                        <motion.button
-                          className="product-add-to-cart"
-                          whileHover={{ scale: product.price ? 1.02 : 1 }}
-                          whileTap={{ scale: product.price ? 0.98 : 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            if (product.price) {
-                              handleAddToCart(product, e);
-                            }
-                          }}
-                          disabled={!product.price}
-                        >
-                          <FaShoppingCart /> {product.price ? 'Add' : 'Unavailable'}
-                        </motion.button>
-                        <motion.button
-                          className="product-buy-now"
-                          whileHover={{ scale: product.price ? 1.02 : 1 }}
-                          whileTap={{ scale: product.price ? 0.98 : 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            if (product.price) {
-                              handleBuyNow(product, e);
-                            }
-                          }}
-                          disabled={!product.price}
-                        >
-                          {product.price ? 'Buy' : 'N/A'}
-                        </motion.button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )
+              {grades.map(grade => (
+                <motion.button
+                  key={grade.value}
+                  className={`filter-btn ${selectedGrade === grade.value ? 'active' : ''}`}
+                  onClick={() => setSelectedGrade(grade.value)}
+                  whileHover={{ y: -3, scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ backgroundColor: selectedGrade === grade.value ? grade.color : '' }}
+                >
+                  <grade.icon />
+                  {grade.label}
+                </motion.button>
               ))}
             </motion.div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <motion.div 
-            className="cta-box"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <div className="cta-content">
-              <h2>Need Plywood Solutions?</h2>
-              <p>Visit our store for premium quality plywood products from top brands</p>
-              
-              <div className="cta-buttons">
-                <Link to="/contact" className="btn-cta">
-                  <span>Get Free Quote</span>
-                  <FaArrowRight />
-                </Link>
-                <a href="tel:+917328019093" className="btn-cta-outline">
-                  <span>Call Now</span>
-                  <FaPhone />
-                </a>
+        {/* Products Section - CARDS COME FROM LEFT/RIGHT */}
+        <section className="products-section" ref={productsRef}>
+          <div className="container">
+            <ScrollReveal variants={sectionTitleVariants} className="section-header">
+              <div className="section-label">
+                <div className="section-label-line"></div>
+                <motion.span
+                  animate={{ letterSpacing: ['3px', '5px', '3px'] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  OUR COLLECTION
+                </motion.span>
+                <div className="section-label-line"></div>
               </div>
+              <h2 className="section-title">
+                Premium <motion.em
+                  animate={{ color: ['#c9a96e', '#bd7b4d', '#c9a96e'] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >Plywood Range</motion.em>
+              </h2>
+            </ScrollReveal>
+
+            {!products || products.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{ textAlign: 'center', padding: '50px' }}
+              >
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <FaBoxOpen style={{ fontSize: '4rem', color: '#c9a96e', marginBottom: '20px' }} />
+                </motion.div>
+                <p style={{ color: '#666' }}>No plywood products found.</p>
+              </motion.div>
+            ) : (
+              <motion.div 
+                className="products-grid"
+                variants={cardContainerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+              >
+                {filteredProducts.map((product, index) => (
+                  <ScrollReveal
+                    key={product._id || product.id || index}
+                    variants={cardVariants}
+                    custom={index}
+                  >
+                    <motion.div
+                      className="product-card"
+                      variants={cardVariants}
+                      whileHover="hover"
+                      onHoverStart={() => setHoveredProduct(product._id || product.id)}
+                      onHoverEnd={() => setHoveredProduct(null)}
+                      onClick={() => setQuickViewProduct(product)}
+                    >
+                      {/* Product Image */}
+                      <div className="product-image-container">
+                        <motion.div
+                          variants={imageZoomVariants}
+                          whileHover="hover"
+                          style={{ height: '100%', width: '100%' }}
+                        >
+                          {product.image ? (
+                            <img 
+                              src={product.image} 
+                              alt={product.name || 'Plywood Product'}
+                              className="product-image"
+                              onError={handleImageError}
+                            />
+                          ) : (
+                            <div className="product-image-placeholder">
+                              <FaImage size={40} />
+                            </div>
+                          )}
+                        </motion.div>
+                        
+                        {/* Wishlist Button */}
+                        <motion.button
+                          className={`product-wishlist ${isInWishlist(product._id || product.id) ? 'active' : ''}`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToWishlist(product, e);
+                          }}
+                        >
+                          <FaHeart />
+                        </motion.button>
+                        
+                        {/* Grade Badge */}
+                        <motion.div 
+                          className="product-badge"
+                          variants={badgeVariants}
+                        >
+                          {product.grade || product.category || 'Premium'}
+                        </motion.div>
+
+                        {/* Quick View Icon */}
+                        {hoveredProduct === (product._id || product.id) && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0 }}
+                            style={{
+                              position: 'absolute',
+                              bottom: '10px',
+                              right: '10px',
+                              background: 'white',
+                              borderRadius: '50%',
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                              zIndex: 10
+                            }}
+                            whileHover={{ scale: 1.1, backgroundColor: '#c9a96e', color: 'white' }}
+                          >
+                            <FaEye />
+                          </motion.div>
+                        )}
+                      </div>
+                      
+                      {/* Product Info */}
+                      <div className="product-content">
+                        <h3 className="product-title">
+                          {product.name || 'Plywood Product'}
+                        </h3>
+                        
+                        {product.description && (
+                          <p className="product-description">
+                            {product.description}
+                          </p>
+                        )}
+                        
+                        {product.brand && (
+                          <div className="product-brand">
+                            <FaIndustry /> {product.brand}
+                          </div>
+                        )}
+                        
+                        {product.thickness && (
+                          <div className="product-thickness">
+                            {Array.isArray(product.thickness) 
+                              ? product.thickness.map(t => (
+                                  <span key={t} className="thickness-tag">{t}</span>
+                                ))
+                              : <span className="thickness-tag">{product.thickness}</span>
+                            }
+                          </div>
+                        )}
+                        
+                        {product.rating && (
+                          <div className="product-rating">
+                            <div className="rating-stars">
+                              {[...Array(5)].map((_, i) => (
+                                <motion.div
+                                  key={i}
+                                  animate={i < Math.floor(product.rating) ? {
+                                    scale: [1, 1.2, 1],
+                                    color: ['#ffb800', '#ffd700', '#ffb800']
+                                  } : {}}
+                                  transition={{ duration: 1, delay: i * 0.1, repeat: Infinity }}
+                                >
+                                  <FaStar color={i < Math.floor(product.rating) ? '#ffb800' : '#e0e0e0'} />
+                                </motion.div>
+                              ))}
+                            </div>
+                            <span className="rating-number">{product.rating}</span>
+                          </div>
+                        )}
+                        
+                        {product.price && (
+                          <div className="product-price-section">
+                            <div>
+                              <span className="current-price">
+                                ₹{product.price}
+                                <small>/sheet</small>
+                              </span>
+                              {product.mrp && product.mrp > product.price && (
+                                <span className="product-mrp">₹{product.mrp}</span>
+                              )}
+                            </div>
+                            
+                            {product.stock !== undefined && (
+                              <motion.span 
+                                className="product-stock"
+                                animate={product.stock < 10 && product.stock > 0 ? {
+                                  scale: [1, 1.1, 1],
+                                  color: ['#ffc107', '#ffa000', '#ffc107']
+                                } : {}}
+                                style={{
+                                  color: product.stock <= 0 ? '#dc3545' : 
+                                         product.stock < 10 ? '#ffc107' : '#28a745'
+                                }}
+                              >
+                                {product.stock <= 0 ? 'Out' : 
+                                 product.stock < 10 ? `${product.stock} left` : 'In stock'}
+                              </motion.span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Action Buttons */}
+                        <div className="product-actions">
+                          <motion.button
+                            className="btn-add-cart"
+                            whileHover="hover"
+                            whileTap="tap"
+                            variants={buttonVariants}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (product.price && product.stock > 0) {
+                                handleAddToCart(product, e);
+                              }
+                            }}
+                            disabled={!product.price || product.stock <= 0}
+                          >
+                            <FaShoppingCart /> 
+                            {!product.price ? 'Unavailable' : 
+                             product.stock <= 0 ? 'Out' : 'Add'}
+                          </motion.button>
+                          <motion.button
+                            className="btn-buy-now"
+                            whileHover="hover"
+                            whileTap="tap"
+                            variants={buttonVariants}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (product.price && product.stock > 0) {
+                                handleBuyNow(product, e);
+                              }
+                            }}
+                            disabled={!product.price || product.stock <= 0}
+                          >
+                            {!product.price ? 'N/A' : 
+                             product.stock <= 0 ? 'Sold' : 'Buy'}
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </ScrollReveal>
+                ))}
+              </motion.div>
+            )}
+          </div>
+        </section>
+
+        {/* Benefits Section - FREE DELIVERY CARD REMOVED */}
+        <section className="benefits-section">
+          <div className="container">
+            <ScrollReveal variants={sectionTitleVariants} className="section-header">
+              <div className="section-label">
+                <div className="section-label-line"></div>
+                <span>WHY CHOOSE US</span>
+                <div className="section-label-line"></div>
+              </div>
+              <h2 className="section-title">
+                Premium <em>Benefits</em>
+              </h2>
+            </ScrollReveal>
+
+            <div className="benefits-grid">
+              {benefits.map((benefit, index) => (
+                <ScrollReveal
+                  key={index}
+                  variants={benefitCardVariants}
+                  custom={index}
+                >
+                  <motion.div
+                    className="benefit-card"
+                    variants={benefitCardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.div 
+                      className="benefit-icon"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <benefit.icon style={{ color: benefit.color }} />
+                    </motion.div>
+                    <h3 className="benefit-title">{benefit.title}</h3>
+                    <p className="benefit-desc">{benefit.desc}</p>
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '3px',
+                        background: `linear-gradient(90deg, ${benefit.color}, transparent)`
+                      }}
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      transition={{ duration: 1, delay: index * 0.1 }}
+                    />
+                  </motion.div>
+                </ScrollReveal>
+              ))}
             </div>
-          </motion.div>
-        </div>
-      </section>
-    </motion.div>
+          </div>
+        </section>
+
+        {/* Brands Section - UPDATED WITH DARKER TEXT */}
+        <section className="brands-section">
+          <div className="container">
+            <ScrollReveal variants={sectionTitleVariants} className="section-header">
+              <div className="section-label">
+                <div className="section-label-line"></div>
+                <span>TRUSTED BRANDS</span>
+                <div className="section-label-line"></div>
+              </div>
+              <h2 className="section-title">
+                Top <em>Manufacturers</em>
+              </h2>
+            </ScrollReveal>
+
+            <div className="brands-grid">
+              {brands.map((brand, index) => (
+                <ScrollReveal
+                  key={index}
+                  variants={brandCardVariants}
+                  custom={index}
+                >
+                  <motion.div
+                    className="brand-card"
+                    variants={brandCardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.img 
+                      src={brand.logo} 
+                      alt={brand.name}
+                      onError={handleImageError}
+                      whileHover={{ scale: 1.1 }}
+                    />
+                    <div className="brand-name">{brand.name}</div>
+                    <div className="brand-desc">{brand.desc}</div>
+                  </motion.div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="cta-section" ref={ctaRef}>
+          <div className="container">
+            <ScrollReveal variants={sectionTitleVariants}>
+              <motion.div 
+                className="cta-box"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8 }}
+                >
+                  <motion.h2
+                    animate={{ 
+                      scale: [1, 1.02, 1],
+                      textShadow: [
+                        "0 2px 4px rgba(0,0,0,0.2)",
+                        "0 4px 8px rgba(0,0,0,0.3)",
+                        "0 2px 4px rgba(0,0,0,0.2)"
+                      ]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    Need Plywood Solutions?
+                  </motion.h2>
+                  <motion.p
+                    animate={{ opacity: [0.8, 1, 0.8] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    Visit our store for premium quality plywood products from top brands
+                  </motion.p>
+                  
+                  <div className="cta-buttons">
+                    <motion.div
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <Link to="/contact" className="btn-cta">
+                        <span>Get Free Quote</span>
+                        <motion.div
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <FaArrowRight />
+                        </motion.div>
+                      </Link>
+                    </motion.div>
+                    <motion.div
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <a href="tel:+917328019093" className="btn-cta-outline">
+                        <span>Call Now</span>
+                        <motion.div
+                          animate={{ rotate: [90, 95, 90] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <FaPhone />
+                        </motion.div>
+                      </a>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* Quick View Modal */}
+        <AnimatePresence>
+          {quickViewProduct && (
+            <motion.div
+              className="quick-view-modal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setQuickViewProduct(null)}
+            >
+              <motion.div
+                className="quick-view-content"
+                initial={{ scale: 0.8, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 50 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  className="close-quick-view"
+                  onClick={() => setQuickViewProduct(null)}
+                >
+                  <FaTimes />
+                </button>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                  <div>
+                    <motion.img 
+                      src={getImageUrl(quickViewProduct.image)} 
+                      alt={quickViewProduct.name}
+                      style={{ width: '100%', borderRadius: '20px' }}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    />
+                  </div>
+                  <div>
+                    <h2 style={{ fontFamily: 'var(--serif)', fontSize: '2rem', marginBottom: '10px' }}>
+                      {quickViewProduct.name}
+                    </h2>
+                    <p style={{ color: '#666', marginBottom: '20px' }}>{quickViewProduct.description}</p>
+                    
+                    <div style={{ marginBottom: '20px' }}>
+                      <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--gold)' }}>
+                        ₹{quickViewProduct.price}
+                        <small style={{ fontSize: '1rem', color: '#999', marginLeft: '10px' }}>/sheet</small>
+                      </div>
+                      {quickViewProduct.mrp && (
+                        <div style={{ color: '#999', textDecoration: 'line-through' }}>
+                          MRP: ₹{quickViewProduct.mrp}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                      <div style={{ background: '#f5f5f5', padding: '5px 15px', borderRadius: '20px' }}>
+                        Grade: {quickViewProduct.grade || 'Premium'}
+                      </div>
+                      {quickViewProduct.thickness && (
+                        <div style={{ background: '#f5f5f5', padding: '5px 15px', borderRadius: '20px' }}>
+                          Thickness: {quickViewProduct.thickness}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <motion.button
+                        className="btn-add-cart"
+                        variants={buttonVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                        onClick={(e) => {
+                          handleAddToCart(quickViewProduct, e);
+                          setQuickViewProduct(null);
+                        }}
+                        style={{ flex: 1, padding: '12px' }}
+                      >
+                        <FaShoppingCart /> Add to Cart
+                      </motion.button>
+                      <motion.button
+                        className="btn-buy-now"
+                        variants={buttonVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                        onClick={(e) => {
+                          handleBuyNow(quickViewProduct, e);
+                          setQuickViewProduct(null);
+                        }}
+                        style={{ flex: 1, padding: '12px' }}
+                      >
+                        Buy Now
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'api.newpremglasshouse.in',
         changeOrigin: true,
         secure: false
       }

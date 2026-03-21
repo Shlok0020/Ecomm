@@ -1,34 +1,31 @@
+// admin/src/components/Sidebar.jsx - COMPLETE FIXED CODE
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FaHome, 
   FaBox, 
-  FaList, 
+  FaTag, 
   FaShoppingCart, 
   FaUsers, 
   FaCog,
   FaSignOutAlt,
-  FaTag,
-  FaChevronLeft,
-  FaChevronRight,
-  FaUserCircle
+  FaUserCircle,
+  FaTimes
 } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState('');
 
   useEffect(() => {
-    // Set active item based on current path
     const path = location.pathname.split('/')[1];
     setActiveItem(path || 'dashboard');
   }, [location]);
 
   const menuItems = [
-    { id: 'dashboard', path: '/', icon: <FaHome />, label: 'Dashboard' },
+    { id: 'dashboard', path: '/dashboard', icon: <FaHome />, label: 'Dashboard' },
     { id: 'products', path: '/products', icon: <FaBox />, label: 'Products' },
     { id: 'categories', path: '/categories', icon: <FaTag />, label: 'Categories' },
     { id: 'orders', path: '/orders', icon: <FaShoppingCart />, label: 'Orders' },
@@ -37,48 +34,71 @@ const Sidebar = () => {
   ];
 
   const handleLogout = () => {
-    // Saare tokens remove karo
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     
     toast.success('Logged out successfully');
-    
-    // 🔴 FRONTEND HOME PAGE PE REDIRECT
-    window.location.href = 'http://localhost:5173';
+    window.location.href = 'https://newpremglasshouse.in';
   };
 
+  // Animation variants
   const sidebarVariants = {
-    expanded: { width: '260px' },
-    collapsed: { width: '80px' }
+    desktop: { width: '260px' },
+    mobileOpen: { 
+      x: 0,
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
+    },
+    mobileClosed: { 
+      x: '-100%',
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
+    }
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
   };
 
   return (
-    <motion.div 
-      className={`sidebar`}
-      variants={sidebarVariants}
-      animate={collapsed ? 'collapsed' : 'expanded'}
-      initial="expanded"
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-    >
-      <div className="sidebar-header">
-        <div className="logo">
-          <span className="logo-main">NP</span>
-          {!collapsed && (
+    <>
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobile && isOpen && (
+          <motion.div 
+            className="sidebar-overlay"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+      
+      {/* Sidebar */}
+      <motion.div 
+        className={`sidebar ${isMobile ? 'mobile' : ''}`}
+        animate={isMobile ? (isOpen ? 'mobileOpen' : 'mobileClosed') : 'desktop'}
+        variants={sidebarVariants}
+        initial={isMobile ? 'mobileClosed' : 'desktop'}
+      >
+        <div className="sidebar-header">
+          <div className="logo">
+            <span className="logo-main">NP</span>
             <div className="logo-text">
               <span>Glass House</span>
               <small>Admin Panel</small>
             </div>
+          </div>
+          {isMobile && (
+            <button className="close-btn" onClick={onClose}>
+              <FaTimes />
+            </button>
           )}
         </div>
-        <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)}>
-          {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
-      </div>
 
-      {/* Admin Profile Summary - Only when expanded */}
-      {!collapsed && (
         <div className="admin-profile">
           <div className="admin-avatar">
             <FaUserCircle />
@@ -88,46 +108,31 @@ const Sidebar = () => {
             <div className="admin-role">Super Admin</div>
           </div>
         </div>
-      )}
 
-      <nav className="sidebar-nav">
-        {menuItems.map(item => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`nav-item ${activeItem === item.id ? 'active' : ''}`}
-            title={collapsed ? item.label : ''}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            {!collapsed && <span className="nav-label">{item.label}</span>}
-            
-            {/* Active indicator */}
-            {activeItem === item.id && !collapsed && (
-              <motion.div 
-                className="active-indicator"
-                layoutId="activeIndicator"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              />
-            )}
-          </Link>
-        ))}
-      </nav>
+        <nav className="sidebar-nav">
+          {menuItems.map(item => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`nav-item ${activeItem === item.id ? 'active' : ''}`}
+              onClick={isMobile ? onClose : undefined}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
 
-      <div className="sidebar-footer">
-        <button className="logout-btn" onClick={handleLogout} title={collapsed ? 'Logout' : ''}>
-          <FaSignOutAlt className="logout-icon" />
-          {!collapsed && <span>Logout</span>}
-        </button>
-        
-        {/* Version info - Only when expanded */}
-        {!collapsed && (
-          <div className="version-info">
-            v1.0.0
-          </div>
-        )}
-      </div>
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={handleLogout}>
+            <FaSignOutAlt className="logout-icon" />
+            <span>Logout</span>
+          </button>
+          <div className="version-info">v1.0.0</div>
+        </div>
+      </motion.div>
 
-      <style jsx>{`
+      <style>{`
         .sidebar {
           height: 100vh;
           background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);
@@ -140,7 +145,35 @@ const Sidebar = () => {
           z-index: 1000;
           box-shadow: 4px 0 20px rgba(0,0,0,0.1);
           overflow-y: auto;
-          overflow-x: hidden;
+        }
+
+        /* Desktop styles */
+        @media (min-width: 769px) {
+          .sidebar {
+            width: 260px;
+          }
+        }
+
+        /* Mobile styles */
+        .sidebar.mobile {
+          position: fixed;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 280px;
+          z-index: 1001;
+          box-shadow: 2px 0 20px rgba(0,0,0,0.4);
+        }
+
+        .sidebar-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 1000;
+          backdrop-filter: blur(3px);
         }
 
         .sidebar-header {
@@ -162,8 +195,6 @@ const Sidebar = () => {
           font-weight: bold;
           color: #c9a96e;
           font-family: 'DM Serif Display', serif;
-          min-width: 45px;
-          text-align: center;
         }
 
         .logo-text {
@@ -184,7 +215,7 @@ const Sidebar = () => {
           opacity: 0.8;
         }
 
-        .collapse-btn {
+        .close-btn {
           width: 32px;
           height: 32px;
           background: rgba(255,255,255,0.1);
@@ -199,7 +230,7 @@ const Sidebar = () => {
           transition: all 0.3s ease;
         }
 
-        .collapse-btn:hover {
+        .close-btn:hover {
           background: #c9a96e;
           color: #1a1a1a;
         }
@@ -247,7 +278,6 @@ const Sidebar = () => {
           color: rgba(255,255,255,0.7);
           text-decoration: none;
           transition: all 0.3s ease;
-          position: relative;
         }
 
         .nav-item:hover {
@@ -269,17 +299,6 @@ const Sidebar = () => {
         .nav-label {
           font-size: 0.95rem;
           font-weight: 500;
-        }
-
-        .active-indicator {
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 4px;
-          height: 20px;
-          background: white;
-          border-radius: 4px 0 0 4px;
         }
 
         .sidebar-footer {
@@ -338,13 +357,23 @@ const Sidebar = () => {
           background: #c9a96e;
         }
 
+        /* Mobile styles */
         @media (max-width: 768px) {
-          .sidebar {
-            width: ${collapsed ? '0' : '260px'};
+          .sidebar.mobile .sidebar-header {
+            padding: 1rem;
+          }
+
+          .sidebar.mobile .admin-profile {
+            padding: 1rem;
+          }
+
+          .sidebar.mobile .nav-item {
+            margin: 0.2rem 0.5rem;
+            padding: 0.7rem 0.8rem;
           }
         }
       `}</style>
-    </motion.div>
+    </>
   );
 };
 

@@ -181,7 +181,7 @@ const Footer = () => {
                   <span className="icon-wrapper">
                     <FaEnvelope />
                   </span>
-                  <a href="mailto:info@newpremglass.com">info@newpremglass.com</a>
+                  <a href="mailto:info@newpremglass.com">newpremglasshouse75@gmail.com</a>
                 </motion.li>
                 <motion.li whileHover={{ x: 5 }}>
                   <span className="icon-wrapper">

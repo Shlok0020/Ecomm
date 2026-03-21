@@ -1,4 +1,4 @@
-// src/pages/About/About.jsx - WITH BACKGROUND IMAGE + INCREASED HEIGHT + DATA FLOW (INDICATOR REMOVED)
+// src/pages/About/About.jsx - SIRF BACKGROUND LAMBA + NORMAL TEXT (NO BLURRED BOXES)
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -21,7 +21,9 @@ import {
   FaGlassCheers,
   FaTree,
   FaCouch,
-  FaWrench
+  FaWrench,
+  FaWhatsapp,
+  FaEnvelope
 } from 'react-icons/fa';
 import glassService from '../services/glassService';
 import plywoodService from '../services/plywoodService';
@@ -31,6 +33,7 @@ import toast from 'react-hot-toast';
 
 const About = () => {
   const [hoveredValue, setHoveredValue] = useState(null);
+  const [hoveredStat, setHoveredStat] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [stats, setStats] = useState({
     years: '10+',
@@ -146,7 +149,7 @@ const About = () => {
 
   const milestones = [
     {
-      year: '2014',
+      year: '2010',
       title: 'The Beginning',
       desc: 'Started as a small glass shop at Bombay Chowk, Jharsuguda'
     },
@@ -172,7 +175,7 @@ const About = () => {
     },
     {
       year: '2024',
-      title: '10 Years Strong',
+      title: '10+ Years Strong',
       desc: 'Celebrating a decade of excellence in Jharsuguda'
     }
   ];
@@ -333,6 +336,7 @@ const About = () => {
           --shadow-md: 0 20px 40px -20px rgba(0,0,0,0.3);
           --shadow-lg: 0 30px 60px -30px rgba(0,0,0,0.4);
           --shadow-gold: 0 20px 40px rgba(201,169,110,0.15);
+          --shadow-hover: 0 40px 60px -20px rgba(201,169,110,0.4);
         }
 
         html { overflow-x: hidden; }
@@ -399,14 +403,14 @@ const About = () => {
         
         .mk-h2 em { font-style: italic; color: var(--gold); }
 
-        /* Hero Section - WITH BACKGROUND IMAGE & INCREASED HEIGHT */
+        /* Hero Section - BACKGROUND LAMBA KIYA */
         .about-hero {
           position: relative;
-          min-height: 80vh;
+          min-height: 100vh;
           display: flex;
           align-items: center;
           overflow: hidden;
-          padding: 120px 0 80px;
+          padding: 140px 0 100px;
           background: var(--dark);
         }
 
@@ -418,13 +422,36 @@ const About = () => {
 
         .about-hero__bg img {
           width: 100%;
-          height: 200%; /* PC ke liye 200% height - niche se height badhi */
+          height: 350%; /* BACKGROUND BOHOT LAMBA - PC KE LIYE */
           object-fit: cover;
-          object-position: center 20%; /* Niche ka part dikhane ke liye */
+          object-position: center 25%;
           opacity: 0.5;
           transform-origin: center;
           transition: transform 0.1s linear;
           will-change: transform;
+        }
+
+        /* MOBILE KE LIYE - BACKGROUND AUR BHI ZYADA LAMBA (INCREASED LENGTH) */
+        @media (max-width: 768px) {
+          .about-hero__bg img {
+            height: 600% !important; /* INCREASED FROM 400% TO 600% - AUR LAMBA */
+            object-position: center 15%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .about-hero__bg img {
+            height: 700% !important; /* INCREASED FROM 450% TO 700% - CHHOTI MOBILE KE LIYE EXTRA LAMBA */
+            object-position: center 10%;
+          }
+        }
+
+        /* EXTRA SMALL DEVICES */
+        @media (max-width: 360px) {
+          .about-hero__bg img {
+            height: 800% !important; /* BOHOT CHHOTI SCREEN KE LIYE 800% LAMBA */
+            object-position: center 5%;
+          }
         }
 
         .about-hero__grain {
@@ -442,8 +469,8 @@ const About = () => {
           background: linear-gradient(
             to top,
             rgba(0,0,0,0.95) 0%,
-            rgba(0,0,0,0.6) 40%,
-            rgba(0,0,0,0.2) 70%,
+            rgba(0,0,0,0.7) 40%,
+            rgba(0,0,0,0.3) 70%,
             transparent 100%
           );
           z-index: 2;
@@ -479,61 +506,115 @@ const About = () => {
           font-size: 0.9rem;
         }
 
+        /* DEFAULT: PC VIEW - EK LINE MAI */
         .about-hero__title {
           font-family: var(--serif);
           font-size: clamp(3rem, 8vw, 5rem);
           font-weight: 300;
           color: var(--white);
           margin-bottom: 1.5rem;
-          line-height: 1;
+          line-height: 1.2;
         }
 
-        .about-hero__title em {
+        .about-hero__title-line1,
+        .about-hero__title-line2 {
+          display: inline; /* PC PE DONO EK LINE MAI */
+        }
+
+        .about-hero__title-line2 {
           font-style: italic;
           color: var(--gold);
+          margin-left: 0.3rem; /* THODA SA GAP */
+        }
+
+        /* MOBILE VIEW: DONO ALAG LINE MAI */
+        @media (max-width: 768px) {
+          .about-hero__title-line1,
+          .about-hero__title-line2 {
+            display: block; /* MOBILE PE BLOCK - NEXT LINE */
+          }
+          
+          .about-hero__title-line1 {
+            margin-bottom: 0.1rem;
+          }
+          
+          .about-hero__title-line2 {
+            margin-left: 0; /* HATAYA GAP */
+            margin-top: -0.2rem;
+          }
         }
 
         .about-hero__desc {
           font-size: 1.2rem;
           color: rgba(255,255,255,0.9);
           max-width: 700px;
-          margin: 0 auto 2rem;
+          margin: 0 auto 1.5rem;
           line-height: 1.8;
           text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        .hero-stats {
+        /* NORMAL TEXT STATS - KOI BLUR BOX NAHI */
+        .about-hero__stats-row {
           display: flex;
           justify-content: center;
-          gap: 3rem;
+          gap: 2rem;
           margin: 2rem 0;
           flex-wrap: wrap;
         }
 
-        .hero-stat {
+        .about-hero__stat-item {
           text-align: center;
-          min-width: 120px;
+          min-width: 100px;
         }
 
-        .hero-stat h4 {
+        .about-hero__stat-item h4 {
           font-family: var(--serif);
-          font-size: 2rem;
+          font-size: 2.2rem;
           color: var(--gold);
           margin-bottom: 0.3rem;
         }
 
-        .hero-stat p {
+        .about-hero__stat-item p {
           font-size: 0.9rem;
-          color: rgba(255,255,255,0.8);
+          color: rgba(255,255,255,0.9);
           text-transform: uppercase;
           letter-spacing: 1px;
+        }
+
+        /* WhatsApp Button */
+        .about-hero__whatsapp-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.8rem;
+          padding: 1rem 2.5rem;
+          background: #25D366;
+          color: white;
+          border-radius: 50px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          margin-top: 1.5rem;
+          border: none;
+          cursor: pointer;
+        }
+
+        .about-hero__whatsapp-btn:hover {
+          background: #128C7E;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+        }
+
+        .about-hero__whatsapp-btn svg {
+          font-size: 1.3rem;
         }
 
         .hero-buttons {
           display: flex;
           gap: 1.5rem;
           justify-content: center;
-          margin-top: 2rem;
+          margin-top: 1rem;
         }
 
         .hero-btn-primary {
@@ -577,58 +658,112 @@ const About = () => {
           transform: translateY(-3px);
         }
 
-        /* Mobile ke liye original height */
+        /* Location & Hours Section - New design for PC */
+        .location-hours-section {
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-top: 2rem;
+          flex-wrap: wrap;
+        }
+
+        .location-hours-item {
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          color: var(--white);
+          font-size: 1rem;
+          background: rgba(255,255,255,0.05);
+          backdrop-filter: blur(10px);
+          padding: 0.8rem 1.5rem;
+          border-radius: 50px;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .location-hours-item svg {
+          color: var(--gold);
+          font-size: 1.2rem;
+        }
+
+        /* Mobile ke liye adjustments */
         @media (max-width: 768px) {
           .about-hero {
-            min-height: 70vh;
+            min-height: auto;
             padding: 100px 0 60px;
           }
           
-          .about-hero__bg img {
-            height: 100%; /* Mobile pe original height */
-            object-position: center;
+          .about-hero__title { 
+            font-size: 2.8rem; 
+            margin-bottom: 1rem;
           }
           
-          .about-hero__title { font-size: 3rem; }
+          .about-hero__desc {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+          }
           
-          /* Hero stats - 2x2 grid on mobile */
-          .hero-stats { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+          /* NORMAL TEXT STATS - KOI BOX NAHI */
+          .about-hero__stats-row {
             gap: 1.5rem;
-            margin: 2rem 0;
+            margin: 1.5rem 0;
           }
           
-          .hero-stat {
-            min-width: auto;
-          }
-          
-          .hero-stat h4 {
+          .about-hero__stat-item h4 {
             font-size: 1.8rem;
           }
           
-          .hero-stat p {
+          .about-hero__stat-item p {
             font-size: 0.8rem;
+          }
+          
+          .hero-buttons { 
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            margin-top: 1.5rem;
+          }
+          
+          .hero-btn-primary, .hero-btn-outline { 
+            flex: 1;
+            padding: 0.9rem 1rem;
+            font-size: 0.9rem;
+            justify-content: center;
+          }
+          
+          .about-hero__whatsapp-btn {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.9rem;
+          }
+
+          .location-hours-section {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+          }
+
+          .location-hours-item {
+            width: 100%;
+            justify-content: center;
           }
         }
 
         @media (max-width: 480px) {
-          .about-hero__bg img {
-            height: 100%; /* Mobile pe original height */
-            object-position: center;
-          }
-          
           .about-hero__title { 
-            font-size: 2.2rem; 
+            font-size: 4rem; 
           }
           
-          /* Hero stats already 2x2 from above */
-          .hero-stat h4 {
+          .about-hero__stat-item h4 {
             font-size: 1.6rem;
+          }
+          
+          .hero-buttons {
+            flex-direction: column;
           }
         }
 
-        /* Stats Section */
+        /* Stats Section - Enhanced Cards */
         .stats-section {
           padding: 80px 0;
           background: var(--white);
@@ -648,18 +783,38 @@ const About = () => {
           box-shadow: var(--shadow-sm);
           transition: all 0.4s ease;
           border: 1px solid rgba(0,0,0,0.02);
+          position: relative;
+          overflow: hidden;
+          cursor: pointer;
         }
 
-        .stat-card:hover {
-          transform: translateY(-10px);
-          box-shadow: var(--shadow-gold);
-          border-color: var(--gold);
+        .stat-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(201,169,110,0.1) 0%, transparent 50%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          pointer-events: none;
+        }
+
+        .stat-card:hover::before {
+          opacity: 1;
         }
 
         .stat-card svg {
           font-size: 3rem;
           color: var(--gold);
           margin-bottom: 1.5rem;
+          transition: all 0.4s ease;
+        }
+
+        .stat-card:hover svg {
+          transform: scale(1.2) rotate(360deg);
+          color: var(--gold-dark);
         }
 
         .stat-card h3 {
@@ -668,6 +823,12 @@ const About = () => {
           color: var(--dark);
           margin-bottom: 0.5rem;
           font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .stat-card:hover h3 {
+          color: var(--gold);
+          transform: scale(1.05);
         }
 
         .stat-card p {
@@ -676,6 +837,21 @@ const About = () => {
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 1px;
+          transition: all 0.3s ease;
+        }
+
+        .stat-card:hover p {
+          color: var(--dark);
+        }
+
+        .stat-particle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: var(--gold);
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 2;
         }
 
         /* Story Section - Card Style */
@@ -1112,7 +1288,7 @@ const About = () => {
           gap: 0.5rem;
         }
 
-        /* Responsive */
+        /* Desktop Responsive */
         @media (max-width: 1200px) {
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
           .values-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1124,31 +1300,48 @@ const About = () => {
           .story-card__image-wrap { min-height: 500px; }
         }
 
+        /* Mobile Responsive - 768px and below */
         @media (max-width: 768px) {
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .stats-grid { 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px;
+          }
+          
           .values-grid { grid-template-columns: 1fr; }
           .milestones-grid { grid-template-columns: 1fr; }
           .story-card__content { padding: 60px 30px; }
           .story-card__features { grid-template-columns: 1fr; }
           
-          .hero-buttons { 
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-          
-          .hero-btn-primary, .hero-btn-outline { 
-            width: 100%; 
-            justify-content: center;
-          }
-          
           .cta-buttons { flex-direction: column; }
           .cta-box h2 { font-size: 2.5rem; }
           .cta-info { flex-direction: column; gap: 1rem; }
+          
+          /* Adjust stat card padding for mobile */
+          .stat-card {
+            padding: 25px 15px;
+          }
+          
+          .stat-card svg {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+          }
+          
+          .stat-card h3 {
+            font-size: 2rem;
+          }
+          
+          .stat-card p {
+            font-size: 0.8rem;
+          }
         }
 
+        /* Small Mobile - 480px and below */
         @media (max-width: 480px) {
-          .stats-grid { grid-template-columns: 1fr; }
+          .stats-grid { 
+            grid-template-columns: 1fr; 
+            gap: 15px;
+          }
+          
           .story-card__badge { 
             bottom: 15px; 
             left: 15px; 
@@ -1156,10 +1349,25 @@ const About = () => {
           }
           .story-card__badge-num { font-size: 1.5rem; }
           .story-card__badge-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+          
+          .stat-card {
+            padding: 30px 20px;
+          }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+          .stat-card:active {
+            transform: scale(0.98);
+          }
+          
+          .stat-card svg:active {
+            transform: scale(1.1);
+          }
         }
       `}</style>
 
-      {/* Hero Section - WITH BACKGROUND IMAGE & INCREASED HEIGHT */}
+      {/* Hero Section - BACKGROUND LAMBA + NORMAL TEXT STATS */}
       <section className="about-hero">
         <div className="about-hero__bg">
           <img
@@ -1176,6 +1384,7 @@ const About = () => {
         
         <div className="container">
           <div className="about-hero__content">
+            {/* 1. BADGE - Since 2014 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1186,15 +1395,18 @@ const About = () => {
               </div>
             </motion.div>
             
+            {/* 2. HEADING - PC PE EK LINE, MOBILE PE DO LINE */}
             <motion.h1
               className="about-hero__title"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              About <em>New Prem Glass House</em>
+              <span className="about-hero__title-line1">About New Prem</span>
+              <span className="about-hero__title-line2">Glass House</span>
             </motion.h1>
             
+            {/* 3. PARAGRAPH - Description */}
             <motion.p
               className="about-hero__desc"
               initial={{ opacity: 0, y: 30 }}
@@ -1205,31 +1417,37 @@ const About = () => {
               in Jharsuguda for over a decade.
             </motion.p>
 
+            {/* 4. NORMAL TEXT STATS - KOI BLUR BOX NAHI - SIRF TEXT */}
             <motion.div 
-              className="hero-stats"
+              className="about-hero__stats-row"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.6 }}
+              transition={{ duration: 0.9, delay: 0.5 }}
             >
-              <div className="hero-stat">
+              <div className="about-hero__stat-item">
                 <h4>{stats.years}</h4>
-                <p>Years</p>
+                <p>Years Experience</p>
               </div>
-              <div className="hero-stat">
+              <div className="about-hero__stat-item">
                 <h4>{stats.clients}</h4>
-                <p>Clients</p>
+                <p>Happy Clients</p>
               </div>
-              <div className="hero-stat">
-                <h4>2014</h4>
-                <p>Est.</p>
+              <div className="about-hero__stat-item">
+                <h4>{stats.projects}</h4>
+                <p>Projects Done</p>
+              </div>
+              <div className="about-hero__stat-item">
+                <h4>{stats.products}</h4>
+                <p>Products</p>
               </div>
             </motion.div>
 
+            {/* 5. ACTION BUTTONS - Get Free Quote & View Our Work */}
             <motion.div
               className="hero-buttons"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.8 }}
+              transition={{ duration: 0.9, delay: 0.6 }}
             >
               <Link to="/contact" className="hero-btn-primary">
                 Get Free Quote <FaArrowRight />
@@ -1238,37 +1456,575 @@ const About = () => {
                 View Our Work
               </Link>
             </motion.div>
+
+            {/* 6. WHATSAPP BUTTON */}
+            <motion.a
+              href="https://wa.me/917328019093"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="about-hero__whatsapp-btn"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.7 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FaWhatsapp /> Chat on WhatsApp
+            </motion.a>
+
+            {/* 7. LOCATION & HOURS - Two items one below another on mobile, side by side on PC */}
+            <motion.div 
+              className="location-hours-section"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.8 }}
+            >
+              <div className="location-hours-item">
+                <FaMapMarkerAlt />
+                <span>Bombay Chowk, Jharsuguda</span>
+              </div>
+              <div className="location-hours-item">
+                <FaClock />
+                <span>Open 9AM - 9PM</span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section - WITH REAL DATA */}
+      {/* Stats Section - WITH MOBILE OPTIMIZED ANIMATIONS (LEFT & RIGHT ENTRANCE) */}
       <section className="stats-section">
         <div className="container">
           <motion.div 
             className="stats-grid"
-            variants={staggerContainer}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { 
+                  staggerChildren: 0.2,
+                  delayChildren: 0.1
+                }
+              }
+            }}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.1 }}
           >
-            {[
-              { icon: <FaCalendarAlt />, value: '2014', label: 'Year Established' },
-              { icon: <FaTrophy />, value: stats.years, label: 'Years Experience' },
-              { icon: <FaUsers />, value: stats.clients, label: 'Happy Clients' },
-              { icon: <FaMapMarkerAlt />, value: 'Bombay Chowk', label: 'Jharsuguda' }
-            ].map((stat, i) => (
-              <motion.div 
-                key={i}
-                className="stat-card"
-                variants={fadeInScale}
-                whileHover={{ y: -10 }}
+            {/* Card 1 - Comes from Left */}
+            <motion.div 
+              className="stat-card"
+              variants={{
+                hidden: { 
+                  opacity: 0,
+                  x: -200,
+                  scale: 0.8
+                },
+                visible: { 
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                  transition: { 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    duration: 0.8
+                  }
+                }
+              }}
+              whileHover={{ 
+                y: -10,
+                scale: 1.05,
+                boxShadow: "var(--shadow-hover)",
+                transition: { type: "spring", stiffness: 400, damping: 25 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onHoverStart={() => setHoveredStat(0)}
+              onHoverEnd={() => setHoveredStat(null)}
+              style={{
+                '--x': `${mousePosition.x}px`,
+                '--y': `${mousePosition.y}px`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200, 
+                  damping: 15,
+                  delay: 0.3 
+                }}
+                whileHover={{ 
+                  scale: 1.2,
+                  rotate: 360,
+                  transition: { duration: 0.5 }
+                }}
               >
-                {stat.icon}
-                <h3>{stat.value}</h3>
-                <p>{stat.label}</p>
+                <FaCalendarAlt />
               </motion.div>
-            ))}
+              
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                2014
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Year Established
+              </motion.p>
+
+              <motion.div
+                className="stat-card__shine"
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
+                transition={{ duration: 0.8 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}
+              />
+
+              <AnimatePresence>
+                {hoveredStat === 0 && (
+                  <>
+                    {[...Array(5)].map((_, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="stat-particle"
+                        initial={{ 
+                          opacity: 0,
+                          scale: 0,
+                          x: 0,
+                          y: 0
+                        }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0, 1, 0],
+                          x: (idx - 2) * 30,
+                          y: -30 - idx * 10,
+                          transition: { 
+                            duration: 1,
+                            delay: idx * 0.1,
+                            repeat: Infinity
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          width: 4,
+                          height: 4,
+                          background: 'var(--gold)',
+                          borderRadius: '50%',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                          left: '50%',
+                          bottom: '50%'
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Card 2 - Comes from Left */}
+            <motion.div 
+              className="stat-card"
+              variants={{
+                hidden: { 
+                  opacity: 0,
+                  x: -200,
+                  scale: 0.8
+                },
+                visible: { 
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                  transition: { 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    duration: 0.8,
+                    delay: 0.1
+                  }
+                }
+              }}
+              whileHover={{ 
+                y: -10,
+                scale: 1.05,
+                boxShadow: "var(--shadow-hover)",
+                transition: { type: "spring", stiffness: 400, damping: 25 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onHoverStart={() => setHoveredStat(1)}
+              onHoverEnd={() => setHoveredStat(null)}
+              style={{
+                '--x': `${mousePosition.x}px`,
+                '--y': `${mousePosition.y}px`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200, 
+                  damping: 15,
+                  delay: 0.4 
+                }}
+                whileHover={{ 
+                  scale: 1.2,
+                  rotate: 360,
+                  transition: { duration: 0.5 }
+                }}
+              >
+                <FaTrophy />
+              </motion.div>
+              
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                {stats.years}
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                Years Experience
+              </motion.p>
+
+              <motion.div
+                className="stat-card__shine"
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
+                transition={{ duration: 0.8 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}
+              />
+
+              <AnimatePresence>
+                {hoveredStat === 1 && (
+                  <>
+                    {[...Array(5)].map((_, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="stat-particle"
+                        initial={{ 
+                          opacity: 0,
+                          scale: 0,
+                          x: 0,
+                          y: 0
+                        }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0, 1, 0],
+                          x: (idx - 2) * 30,
+                          y: -30 - idx * 10,
+                          transition: { 
+                            duration: 1,
+                            delay: idx * 0.1,
+                            repeat: Infinity
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          width: 4,
+                          height: 4,
+                          background: 'var(--gold)',
+                          borderRadius: '50%',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                          left: '50%',
+                          bottom: '50%'
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Card 3 - Comes from Right */}
+            <motion.div 
+              className="stat-card"
+              variants={{
+                hidden: { 
+                  opacity: 0,
+                  x: 200,
+                  scale: 0.8
+                },
+                visible: { 
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                  transition: { 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    duration: 0.8,
+                    delay: 0.2
+                  }
+                }
+              }}
+              whileHover={{ 
+                y: -10,
+                scale: 1.05,
+                boxShadow: "var(--shadow-hover)",
+                transition: { type: "spring", stiffness: 400, damping: 25 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onHoverStart={() => setHoveredStat(2)}
+              onHoverEnd={() => setHoveredStat(null)}
+              style={{
+                '--x': `${mousePosition.x}px`,
+                '--y': `${mousePosition.y}px`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: 180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200, 
+                  damping: 15,
+                  delay: 0.5 
+                }}
+                whileHover={{ 
+                  scale: 1.2,
+                  rotate: 360,
+                  transition: { duration: 0.5 }
+                }}
+              >
+                <FaUsers />
+              </motion.div>
+              
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                {stats.clients}
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                Happy Clients
+              </motion.p>
+
+              <motion.div
+                className="stat-card__shine"
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
+                transition={{ duration: 0.8 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}
+              />
+
+              <AnimatePresence>
+                {hoveredStat === 2 && (
+                  <>
+                    {[...Array(5)].map((_, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="stat-particle"
+                        initial={{ 
+                          opacity: 0,
+                          scale: 0,
+                          x: 0,
+                          y: 0
+                        }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0, 1, 0],
+                          x: (idx - 2) * 30,
+                          y: -30 - idx * 10,
+                          transition: { 
+                            duration: 1,
+                            delay: idx * 0.1,
+                            repeat: Infinity
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          width: 4,
+                          height: 4,
+                          background: 'var(--gold)',
+                          borderRadius: '50%',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                          left: '50%',
+                          bottom: '50%'
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Card 4 - Comes from Right */}
+            <motion.div 
+              className="stat-card"
+              variants={{
+                hidden: { 
+                  opacity: 0,
+                  x: 200,
+                  scale: 0.8
+                },
+                visible: { 
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                  transition: { 
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    duration: 0.8,
+                    delay: 0.3
+                  }
+                }
+              }}
+              whileHover={{ 
+                y: -10,
+                scale: 1.05,
+                boxShadow: "var(--shadow-hover)",
+                transition: { type: "spring", stiffness: 400, damping: 25 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onHoverStart={() => setHoveredStat(3)}
+              onHoverEnd={() => setHoveredStat(null)}
+              style={{
+                '--x': `${mousePosition.x}px`,
+                '--y': `${mousePosition.y}px`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: 180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 200, 
+                  damping: 15,
+                  delay: 0.6 
+                }}
+                whileHover={{ 
+                  scale: 1.2,
+                  rotate: 360,
+                  transition: { duration: 0.5 }
+                }}
+              >
+                <FaMapMarkerAlt />
+              </motion.div>
+              
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                Bombay Chowk
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                Jharsuguda
+              </motion.p>
+
+              <motion.div
+                className="stat-card__shine"
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
+                transition={{ duration: 0.8 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}
+              />
+
+              <AnimatePresence>
+                {hoveredStat === 3 && (
+                  <>
+                    {[...Array(5)].map((_, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="stat-particle"
+                        initial={{ 
+                          opacity: 0,
+                          scale: 0,
+                          x: 0,
+                          y: 0
+                        }}
+                        animate={{ 
+                          opacity: [0, 1, 0],
+                          scale: [0, 1, 0],
+                          x: (idx - 2) * 30,
+                          y: -30 - idx * 10,
+                          transition: { 
+                            duration: 1,
+                            delay: idx * 0.1,
+                            repeat: Infinity
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          width: 4,
+                          height: 4,
+                          background: 'var(--gold)',
+                          borderRadius: '50%',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                          left: '50%',
+                          bottom: '50%'
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -1286,7 +2042,7 @@ const About = () => {
             <div className="story-card__frame">
               <div className="story-card__image-inner">
                 <img
-                  src="./newprem.jpeg"
+                  src="/prem.jpeg"
                   alt="Our Showroom"
                   onError={handleImageError}
                 />
@@ -1327,7 +2083,7 @@ const About = () => {
             <motion.p className="story-card__body" variants={fadeInUp}>
               Established in 2014 at Bombay Chowk, Jharsuguda, New Prem Glass House has grown
               from a small glass shop to a comprehensive interior solutions provider. With over
-              14 years of industry experience, we have successfully completed thousands of
+              10 years of industry experience, we have successfully completed thousands of
               projects, earning the trust of our customers through quality workmanship and
               exceptional service.
             </motion.p>
@@ -1341,9 +2097,7 @@ const About = () => {
             <motion.div className="story-card__features" variants={staggerContainer}>
               {[
                 'Premium Quality Products',
-                'Expert Team of Designers',
-                `${stats.clients} Satisfied Customers`,
-                `${stats.years} Years Excellence`
+                'Expert Team of Designers'
               ].map((feature, i) => (
                 <motion.div className="story-card__feature" key={i} variants={fadeInUp}>
                   <FaCheckCircle />

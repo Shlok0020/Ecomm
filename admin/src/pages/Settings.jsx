@@ -51,7 +51,7 @@ const Settings = () => {
     const token = localStorage.getItem('token');
     if (token) {
       console.log('✅ Token exists, forcing redirect to /settings');
-      window.location.href = 'http://localhost:5174/settings';
+      window.location.href = 'admin.newpremglasshouse.in/settings';
     }
   }
 }, []);
